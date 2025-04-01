@@ -1,9 +1,5 @@
-local scale = 4
-local screenWidth, screenHeight = 256, 192
-local windowWidth, windowHeight = screenWidth * scale, screenHeight * scale
-
+local config = require("config")
 local canvas
-local shadowColor = {0, 105 / 255, 170 / 255, 1}
 
 local player = require("player")
 local assets = require("assets")
@@ -13,20 +9,20 @@ local projectile = require("projectile")
 local particle = require("particle")
 
 function love.load()
-    love.window.setMode(windowWidth, windowHeight, { resizable = false })
-    love.window.setTitle("Bait and Switch (LÖVE)")
+    love.window.setMode(config.window.width, config.window.height, { resizable = false })
+    love.window.setTitle(config.game.title)
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     love.mouse.setVisible(false)
 
-    canvas = love.graphics.newCanvas(screenWidth, screenHeight)
+    canvas = love.graphics.newCanvas(config.screen.width, config.screen.height)
 
-    assets.load()
-    player.load(assets)
-    enemy.load(assets)
-    net.load(assets, player)
-    projectile.load(assets)
-    particle.load(assets)
+    assets.load(config)
+    player.load(assets, config)
+    enemy.load(assets, config)
+    net.load(assets, player, config)
+    projectile.load(assets, config)
+    particle.load(assets, config)
 end
 
 function love.update(dt)
@@ -49,32 +45,28 @@ function love.draw()
     love.graphics.draw(assets.bg, 0, 0)
 
     player.draw()
-
     enemy.draw()
-
     net.draw()
-
     projectile.draw()
-    
     particle.draw()
 
     drawCursor()
 
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(canvas, 0, 0, 0, scale, scale)
+    love.graphics.draw(canvas, 0, 0, 0, config.screen.scale, config.screen.scale)
 end
 
 function drawCursor()
     local mx, my = love.mouse.getPosition()
-    mx = math.floor(mx / scale)
-    my = math.floor(my / scale)
+    mx = math.floor(mx / config.screen.scale)
+    my = math.floor(my / config.screen.scale)
 
     local ox = assets.cursor:getWidth() / 2
     local oy = assets.cursor:getHeight() / 2
     local rot = love.timer.getTime() * 2
 
-    love.graphics.setColor(assets.shadowColor)
+    love.graphics.setColor(config.visual.shadowColor)
     love.graphics.draw(assets.cursor, mx + 1, my + 1, rot, 1, 1, ox, oy)
 
     love.graphics.setColor(1, 1, 1)

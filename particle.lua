@@ -1,9 +1,18 @@
 local particle = {}
 
+particle.config = {
+    defaultScale = 0.5,
+    defaultScaleDecay = 0.5,
+    defaultRotation = 0,
+    defaultVelocity = {x = 0, y = 0},
+    defaultColor = {1, 1, 1, 1}  -- Default to white
+}
+
 particle.active = {}
 
-function particle.load(assets)
+function particle.load(assets, config)
     particle.shadowColor = assets.shadowColor
+    particle.shadowOffset = config.visual.shadowOffset
 end
 
 function particle.create(x, y, sprite, options)
@@ -13,13 +22,14 @@ function particle.create(x, y, sprite, options)
     p.x = x
     p.y = y
     p.sprite = sprite
-    p.scale = options.scale or 0.5
-    p.scaleDecay = options.scaleDecay or 0.5
+    p.scale = options.scale or particle.config.defaultScale
+    p.scaleDecay = options.scaleDecay or particle.config.defaultScaleDecay
     p.angle = options.angle or 0
-    p.rotation = options.rotation or 0
-    p.vx = options.vx or 0
-    p.vy = options.vy or 0
-    p.shadowOffset = options.shadowOffset or 2
+    p.rotation = options.rotation or particle.config.defaultRotation
+    p.vx = options.vx or particle.config.defaultVelocity.x
+    p.vy = options.vy or particle.config.defaultVelocity.y
+    p.shadowOffset = options.shadowOffset or particle.shadowOffset
+    p.color = options.color or particle.config.defaultColor
     
     table.insert(particle.active, p)
     return p
@@ -63,7 +73,7 @@ function particle.draw()
             oy
         )
         
-        love.graphics.setColor(1, 1, 1)
+        love.graphics.setColor(p.color)
         love.graphics.draw(
             p.sprite, 
             px, 

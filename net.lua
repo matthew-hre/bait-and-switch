@@ -2,7 +2,18 @@ local net = {}
 
 local projectile = require("projectile")
 
-function net.load(assets, playerRef)
+net.config = {
+    swingOutSpeed = 20,
+    swingInSpeed = 16,
+    swingHoldDuration = 0.3,
+    
+    followDistance = 16,
+    collisionRadius = 12,
+    
+    mouseScale = 4
+}
+
+function net.load(assets, playerRef, config)
     net.sprite = assets.netSprite
     net.loadedSprite = assets.netLoadedSprite
     net.shadowColor = assets.shadowColor
@@ -13,31 +24,30 @@ function net.load(assets, playerRef)
     net.y = 0
     net.angle = 0
     net.scaleY = 1
-    net.shadowOffset = 3
 
-    net.followDistance = net.sprite:getWidth()
+    net.shadowOffset = config.visual.shadowOffset
+    net.mouseScale = config.screen.scale
+    
+    net.config.followDistance = net.sprite:getWidth()
+    
     net.swinging = false
     net.loaded = false
+    net.swingingOut = false
 
     net.swingHoldTimer = 0
-    net.swingHoldDuration = 0.3
     
-    -- bigger is faster
-    net.swingOutSpeed = 20
-    net.swingInSpeed = 16
-    
-    net.collisionRadius = 12
+    net.netButton = config.controls.action.net
 end
 
 function net.update(dt)
     local mx, my = love.mouse.getPosition()
-    mx = mx / 4
-    my = my / 4
+    mx = mx / net.mouseScale
+    my = my / net.mouseScale
     local angleToMouse = math.atan2(my - net.player.y, mx - net.player.x) + math.pi / 2
 
     local positioningAngle = angleToMouse + math.pi
-    local targetX = net.player.x + math.cos(positioningAngle) * net.followDistance
-    local targetY = net.player.y + math.sin(positioningAngle) * net.followDistance
+    local targetX = net.player.x + math.cos(positioningAngle) * net.config.followDistance
+    local targetY = net.player.y + math.sin(positioningAngle) * net.config.followDistance
 
     local ease = 30 * dt
     net.x = net.x + (targetX - net.x) * ease
@@ -47,15 +57,15 @@ function net.update(dt)
 
     if net.swinging then
         if net.swingingOut then
-            net.scaleY = net.scaleY - net.swingOutSpeed * dt
+            net.scaleY = net.scaleY - net.config.swingOutSpeed * dt
             if net.scaleY <= -1 then
                 net.scaleY = -1
                 net.swingingOut = false
                 net.swingHoldTimer = 0
                 
                 local mx, my = love.mouse.getPosition()
-                mx = mx / 4
-                my = my / 4
+                mx = mx / net.mouseScale
+                my = my / net.mouseScale
                 
                 if net.loaded then
                     local netTipX = net.x + math.sin(net.angle) * net.sprite:getHeight()
@@ -67,11 +77,11 @@ function net.update(dt)
                     net.checkEnemyCollision()
                 end
             end
-        elseif net.swingHoldTimer < net.swingHoldDuration then
+        elseif net.swingHoldTimer < net.config.swingHoldDuration then
             net.swingHoldTimer = net.swingHoldTimer + dt
             -- do nothing, hold the frame
         else
-            net.scaleY = net.scaleY + net.swingInSpeed * dt
+            net.scaleY = net.scaleY + net.config.swingInSpeed * dt
             if net.scaleY >= 1 then
                 net.scaleY = 1
                 net.swinging = false
@@ -80,11 +90,10 @@ function net.update(dt)
     
         net.shadowOffset = math.abs(3 * net.scaleY)
     end
-    
 end
 
 function net.mousepressed(x, y, button)
-    if button == 1 and not net.swinging then
+    if button == net.netButton and not net.swinging then
         net.swinging = true
         net.swingingOut = true
     end
@@ -96,13 +105,18 @@ function net.checkEnemyCollision()
     local netTipX = net.x + math.sin(net.angle) * net.sprite:getHeight()
     local netTipY = net.y - math.cos(net.angle) * net.sprite:getHeight()
     
-    local dx = netTipX - enemy.x
-    local dy = netTipY - enemy.y
-    local distance = math.sqrt(dx * dx + dy * dy)
-    
-    if distance < net.collisionRadius then
-        enemy.caught = true
-        net.loaded = true
+    for i, e in ipairs(enemy.active) do
+        if not e.caught then
+            local dx = netTipX - e.x
+            local dy = netTipY - e.y
+            local distance = math.sqrt(dx * dx + dy * dy)
+            
+            if distance < net.config.collisionRadius then
+                e.caught = true
+                net.loaded = true
+                return
+            end
+        end
     end
 end
 
