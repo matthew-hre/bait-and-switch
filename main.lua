@@ -8,6 +8,9 @@ local shadowColor = {0, 105 / 255, 170 / 255, 1}
 local player = require("player")
 local assets = require("assets")
 local net = require("net")
+local enemy = require("enemy")
+local projectile = require("projectile")
+local particle = require("particle")
 
 function love.load()
     love.window.setMode(windowWidth, windowHeight, { resizable = false })
@@ -20,12 +23,18 @@ function love.load()
 
     assets.load()
     player.load(assets)
+    enemy.load(assets)
     net.load(assets, player)
+    projectile.load(assets)
+    particle.load(assets)
 end
 
 function love.update(dt)
     player.update(dt)
     net.update(dt)
+    enemy.update(dt)
+    projectile.update(dt)
+    particle.update(dt)
 end
 
 function love.mousepressed(x, y, button)
@@ -41,7 +50,13 @@ function love.draw()
 
     player.draw()
 
+    enemy.draw()
+
     net.draw()
+
+    projectile.draw()
+    
+    particle.draw()
 
     drawCursor()
 

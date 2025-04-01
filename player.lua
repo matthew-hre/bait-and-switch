@@ -5,7 +5,7 @@ function player.load(assets)
     player.shadowColor = assets.shadowColor
     player.x = 128
     player.y = 96
-    player.speed = 80
+    player.speed = 100
     player.angle = 0
 end
 
