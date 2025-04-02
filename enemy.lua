@@ -3,6 +3,8 @@ local enemy = {}
 local player = require("player")
 local particle = require("particle")
 
+local gameState = require("gameState")
+
 enemy.config = {
     initialSpawnInterval = 1.5,
     minSpawnInterval = 2.0,
@@ -28,7 +30,7 @@ enemy.config = {
         maxScaleDecay = 1.8,
         maxRotationSpeed = 6,
         maxVelocity = 60
-    }
+    },
 }
 
 enemy.active = {}
@@ -65,6 +67,15 @@ function enemy.kill(e)
     if e.dead or e.caught then return end
     
     e.dead = true
+    
+    gameState.stats.killCount = gameState.stats.killCount + 1
+    gameState.stats.waveKills = gameState.stats.waveKills + 1
+    
+    if gameState.stats.waveKills >= gameState.killsPerWave then
+        gameState.stats.waveKills = 0
+        gameState.stats.currentWave = gameState.stats.currentWave + 1
+        -- could add wave completion logic here
+    end
     
     local particleCount = math.random(
         enemy.config.death.minParticles,

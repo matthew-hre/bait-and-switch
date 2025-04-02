@@ -8,6 +8,10 @@ local enemy = require("enemy")
 local projectile = require("projectile")
 local particle = require("particle")
 
+local gameState = require("gameState")
+
+local ui = require("ui")
+
 function love.load()
     love.window.setMode(config.window.width, config.window.height, { resizable = false })
     love.window.setTitle(config.game.title)
@@ -23,6 +27,8 @@ function love.load()
     net.load(assets, player, config)
     projectile.load(assets, config)
     particle.load(assets, config)
+
+    ui.load(assets, config)
 end
 
 function love.update(dt)
@@ -31,6 +37,10 @@ function love.update(dt)
     enemy.update(dt)
     projectile.update(dt)
     particle.update(dt)
+    
+    ui.setProgress(gameState.stats.killCount, gameState.killsPerWave)
+    
+    ui.update(dt)
 end
 
 function love.mousepressed(x, y, button)
@@ -49,6 +59,8 @@ function love.draw()
     net.draw()
     projectile.draw()
     particle.draw()
+
+    ui.draw()
 
     drawCursor()
 

@@ -1,6 +1,7 @@
 local net = {}
 
 local projectile = require("projectile")
+local gameState = require("gameState")
 
 net.config = {
     swingOutSpeed = 20,

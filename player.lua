@@ -1,5 +1,7 @@
 local player = {}
 
+local gameState = require("gameState")
+
 player.config = {
     startX = 128,
     startY = 160,
