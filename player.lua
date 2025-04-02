@@ -1,5 +1,7 @@
 local player = {}
 
+local config = require("config")
+local assets = require("assets")
 local gameState = require("gameState")
 
 player.config = {
@@ -10,7 +12,7 @@ player.config = {
     spinSpeed = 2,
 }
 
-function player.load(assets, config)
+function player.load()
     player.sprite = assets.playerSprite
     player.shadowColor = assets.shadowColor
     player.x = player.config.startX

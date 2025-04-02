@@ -21,14 +21,13 @@ function love.load()
 
     canvas = love.graphics.newCanvas(config.screen.width, config.screen.height)
 
-    assets.load(config)
-    player.load(assets, config)
-    enemy.load(assets, config)
-    net.load(assets, player, config)
-    projectile.load(assets, config)
-    particle.load(assets, config)
-
-    ui.load(assets, config)
+    assets.load()
+    player.load()
+    enemy.load()
+    net.load()
+    projectile.load()
+    particle.load()
+    ui.load()
 end
 
 function love.update(dt)
@@ -38,7 +37,8 @@ function love.update(dt)
     projectile.update(dt)
     particle.update(dt)
     
-    ui.setProgress(gameState.stats.killCount, gameState.killsPerWave)
+    ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
+    ui.setWaveNumber(gameState.stats.currentWave)
     
     ui.update(dt)
 end

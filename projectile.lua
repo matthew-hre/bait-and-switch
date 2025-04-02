@@ -1,7 +1,10 @@
 local projectile = {}
 
+local config = require("config")
+local assets = require("assets")
 local particle = require("particle")
 local enemy = require("enemy")
+local gameState = require("gameState")
 
 projectile.config = {
     speed = 350,
@@ -19,12 +22,12 @@ projectile.config = {
         maxVelocity = 20
     },
     
-    collisionRadius = 12  -- Radius for collision detection with enemies
+    collisionRadius = 12
 }
 
 projectile.active = {}
 
-function projectile.load(assets, config)
+function projectile.load()
     projectile.sprite = assets.enemySprite
     projectile.shadowColor = assets.shadowColor
     
@@ -44,7 +47,6 @@ function projectile.create(x, y, targetX, targetY)
     p.vx = math.cos(p.angle) * projectile.config.speed
     p.vy = math.sin(p.angle) * projectile.config.speed
     
-    -- Add a table to track which enemies this projectile has hit
     p.hitEnemies = {}
     
     table.insert(projectile.active, p)
@@ -88,10 +90,8 @@ function projectile.update(dt)
             p.particleTimer = 0
         end
         
-        -- Check for enemy collisions but don't destroy the projectile
         projectile.checkEnemyCollision(p)
         
-        -- Only remove if out of bounds
         if p.x < -projectile.config.margin or 
            p.x > projectile.screenWidth + projectile.config.margin or
            p.y < -projectile.config.margin or 
@@ -101,20 +101,16 @@ function projectile.update(dt)
     end
 end
 
--- Modified function to check collisions without destroying the projectile
 function projectile.checkEnemyCollision(proj)
     for i, e in ipairs(enemy.active) do
-        -- Skip caught, dead, or already hit enemies
         if not e.caught and not e.dead and not proj.hitEnemies[e] then
             local dx = proj.x - e.x
             local dy = proj.y - e.y
             local distance = math.sqrt(dx * dx + dy * dy)
             
             if distance < projectile.config.collisionRadius then
-                -- Mark this enemy as hit by this projectile
                 proj.hitEnemies[e] = true
                 
-                -- Kill the enemy and generate particles
                 enemy.kill(e)
             end
         end

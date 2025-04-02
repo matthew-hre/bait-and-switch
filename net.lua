@@ -1,5 +1,9 @@
 local net = {}
 
+local config = require("config")
+local assets = require("assets")
+local playerRef = require("player")
+
 local projectile = require("projectile")
 local gameState = require("gameState")
 
@@ -14,7 +18,7 @@ net.config = {
     mouseScale = 4
 }
 
-function net.load(assets, playerRef, config)
+function net.load()
     net.sprite = assets.netSprite
     net.loadedSprite = assets.netLoadedSprite
     net.shadowColor = assets.shadowColor

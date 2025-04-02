@@ -1,5 +1,7 @@
 local enemy = {}
 
+local config = require("config")
+local assets = require("assets")
 local player = require("player")
 local particle = require("particle")
 
@@ -37,7 +39,7 @@ enemy.active = {}
 enemy.spawnTimer = 0
 enemy.spawnInterval = enemy.config.initialSpawnInterval
 
-function enemy.load(assets, config)
+function enemy.load()
     enemy.sprite = assets.enemySprite
     enemy.shadowColor = assets.shadowColor
     
@@ -74,7 +76,7 @@ function enemy.kill(e)
     if gameState.stats.waveKills >= gameState.killsPerWave then
         gameState.stats.waveKills = 0
         gameState.stats.currentWave = gameState.stats.currentWave + 1
-        -- could add wave completion logic here
+        -- update wave completion logic here
     end
     
     local particleCount = math.random(

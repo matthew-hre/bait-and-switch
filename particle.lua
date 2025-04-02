@@ -1,16 +1,19 @@
 local particle = {}
 
+local assets = require("assets")
+local config = require("config")
+
 particle.config = {
     defaultScale = 0.5,
     defaultScaleDecay = 0.5,
     defaultRotation = 0,
     defaultVelocity = {x = 0, y = 0},
-    defaultColor = {1, 1, 1, 1}  -- Default to white
+    defaultColor = {1, 1, 1, 1} 
 }
 
 particle.active = {}
 
-function particle.load(assets, config)
+function particle.load()
     particle.shadowColor = assets.shadowColor
     particle.shadowOffset = config.visual.shadowOffset
 end

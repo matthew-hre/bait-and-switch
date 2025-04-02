@@ -1,5 +1,7 @@
 local ui = {}
 
+local config = require("config")
+local assets = require("assets")
 local gameState = require("gameState")
 
 ui.config = {
@@ -11,7 +13,7 @@ ui.config = {
     },
 
     animationSpeed = 5,
-    resetAnimationSpeed = 8, -- Speed for the reset animation
+    resetAnimationSpeed = 8,
     shadowOffset = 2,
 }
 
@@ -19,15 +21,15 @@ ui.progress = {
     current = 0,
     total = 5,
     progressWidth = 0,
-    isResetting = false, -- Flag to indicate reset animation is in progress
-    resetStartWidth = 0   -- Store the width when reset begins
+    isResetting = false,
+    resetStartWidth = 0
 }
 
 ui.waveInfo = {
     number = 1
 }
 
-function ui.load(assets, config)
+function ui.load()
     ui.bar = assets.progressBar
     ui.shadowColor = assets.shadowColor
     
@@ -42,10 +44,13 @@ function ui.load(assets, config)
     ui.fillColor = {0.96, 0.33, 0.36}
     
     ui.progress.progressWidth = 0
+    
+    ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
+    ui.setWaveNumber(gameState.stats.currentWave)
 end
 
 function ui.setProgress(current, total)
-    if current < ui.progress.current then
+    if current < ui.progress.current or (ui.progress.current >= ui.progress.total and current < total) then
         ui.progress.isResetting = true
         ui.progress.resetStartWidth = ui.progress.progressWidth
     end
@@ -75,7 +80,7 @@ function ui.update(dt)
     else
         local targetWidth = barWidth * (ui.progress.current / ui.progress.total)
         
-        ui.progress.progressWidth = math.max(0, math.min(targetWidth, lerp(
+        ui.progress.progressWidth = math.max(0, math.min(barWidth, lerp(
             ui.progress.progressWidth, 
             targetWidth,
             dt * ui.config.animationSpeed

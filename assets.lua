@@ -1,6 +1,8 @@
 local assets = {}
 
-function assets.load(config)
+local config = require("config")
+
+function assets.load()
     assets.bg = love.graphics.newImage("assets/bg.png")
     assets.cursor = love.graphics.newImage("assets/cursor.png")
 
@@ -11,7 +13,6 @@ function assets.load(config)
 
     assets.enemySprite = love.graphics.newImage("assets/enemy.png")
     
-    -- Make sure these asset names match what ui.lua expects
     assets.progress = love.graphics.newImage("assets/progress.png")
     assets.progressBar = love.graphics.newImage("assets/progressBar.png")
 
