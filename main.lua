@@ -38,7 +38,6 @@ function love.update(dt)
     particle.update(dt)
     
     ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
-    ui.setWaveNumber(gameState.stats.currentWave)
     
     ui.update(dt)
 end

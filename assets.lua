@@ -16,6 +16,8 @@ function assets.load()
     assets.progress = love.graphics.newImage("assets/progress.png")
     assets.progressBar = love.graphics.newImage("assets/progressBar.png")
 
+    assets.heart = love.graphics.newImage("assets/heart.png")
+
     assets.shadowColor = config.visual.shadowColor
 end
 
