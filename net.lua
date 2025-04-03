@@ -50,7 +50,14 @@ function net.update(dt)
     my = my / net.mouseScale
     local angleToMouse = math.atan2(my - net.player.y, mx - net.player.x) + math.pi / 2
 
-    local positioningAngle = angleToMouse + math.pi
+    local positioningAngle
+    if config.settings.netPosition == "right" then
+        positioningAngle = angleToMouse
+    else
+        -- default to left side
+        positioningAngle = angleToMouse + math.pi
+    end
+    
     local targetX = net.player.x + math.cos(positioningAngle) * net.config.followDistance
     local targetY = net.player.y + math.sin(positioningAngle) * net.config.followDistance
 

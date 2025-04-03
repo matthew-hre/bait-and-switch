@@ -12,7 +12,11 @@ local config = {
     },
     
     game = {
-        title = "Bait and Switch (LÖVE)"
+        title = "Bait and Switch (LÖVE)",
+    },
+
+    settings = {
+        netPosition = "left",
     },
     
     controls = {
