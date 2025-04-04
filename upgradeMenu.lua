@@ -12,15 +12,15 @@ upgradeMenu.config = {
 }
 
 function upgradeMenu.load()
-    upgradeMenu.popup = assets.popup
+    upgradeMenu.popup = assets.ui.popup
     upgradeMenu.shadowColor = assets.shadowColor
     upgradeMenu.visible = false
     upgradeMenu.isAnimating = false
     upgradeMenu.isExiting = false
     upgradeMenu.y = upgradeMenu.config.startY
     upgradeMenu.targetY = 0 -- will be calculated when shown
-    upgradeMenu.width = assets.popup:getWidth()
-    upgradeMenu.height = assets.popup:getHeight()
+    upgradeMenu.width = assets.ui.popup:getWidth()
+    upgradeMenu.height = assets.ui.popup:getHeight()
 end
 
 function upgradeMenu.show()

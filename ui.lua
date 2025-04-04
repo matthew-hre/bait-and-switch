@@ -42,9 +42,9 @@ ui.hearts = {
 }
 
 function ui.load()
-    ui.bar = assets.progressBar
+    ui.bar = assets.ui.progressBar
     ui.shadowColor = assets.shadowColor
-    ui.heartImage = assets.heart
+    ui.heartImage = assets.ui.heart
     
     ui.scale = config.screen.scale
     ui.screenWidth = config.screen.width

@@ -13,12 +13,22 @@ function assets.load()
 
     assets.enemySprite = love.graphics.newImage("assets/enemy.png")
     
-    assets.progress = love.graphics.newImage("assets/progress.png")
-    assets.progressBar = love.graphics.newImage("assets/progressBar.png")
+    assets.ui.progress = love.graphics.newImage("assets/ui/progress.png")
+    assets.ui.progressBar = love.graphics.newImage("assets/ui/progressBar.png")
+    assets.ui.heart = love.graphics.newImage("assets/ui/heart.png")
+    assets.ui.popup = love.graphics.newImage("assets/ui/popup.png")
 
-    assets.heart = love.graphics.newImage("assets/heart.png")
+    assets.ui.upgrades.bomb = love.graphics.newImage("assets/ui/upgrades/bomb.png")
+    assets.ui.upgrades.bounce = love.graphics.newImage("assets/ui/upgrades/bounce.png")
+    assets.ui.upgrades.electric = love.graphics.newImage("assets/ui/upgrades/electric.png")
+    assets.ui.upgrades.heart = love.graphics.newImage("assets/ui/upgrades/heart.png")
+    assets.ui.upgrades.shotsizeup = love.graphics.newImage("assets/ui/upgrades/shotsizeup.png")
+    assets.ui.upgrades.sizedown = love.graphics.newImage("assets/ui/upgrades/sizedown.png")
+    assets.ui.upgrades.slow = love.graphics.newImage("assets/ui/upgrades/slow.png")
+    assets.ui.upgrades.splitshot = love.graphics.newImage("assets/ui/upgrades/splitshot.png")
 
-    assets.popup = love.graphics.newImage("assets/popup.png")
+    assets.ui.tutorial.click = love.graphics.newImage("assets/ui/tutorial/click.png")
+    assets.ui.tutorial.walk = love.graphics.newImage("assets/ui/tutorial/walk.png")
     
     assets.shadowColor = config.visual.shadowColor
 end
