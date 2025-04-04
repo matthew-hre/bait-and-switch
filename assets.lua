@@ -18,6 +18,8 @@ function assets.load()
 
     assets.heart = love.graphics.newImage("assets/heart.png")
 
+    assets.popup = love.graphics.newImage("assets/popup.png")
+    
     assets.shadowColor = config.visual.shadowColor
 end
 

@@ -3,6 +3,8 @@ local ui = {}
 local config = require("config")
 local assets = require("assets")
 local gameState = require("gameState")
+local player = require("player")
+local utils = require("utils")
 
 ui.config = {
     progress = {
@@ -57,9 +59,11 @@ function ui.load()
     ui.progress.progressWidth = 0
     
     ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
-    
-    -- Initialize player health
+
     ui.setHealth(3)
+    
+    ui.hearts.max = player.config.maxHealth
+    ui.hearts.current = player.health
 end
 
 function ui.setProgress(current, total)
@@ -80,7 +84,7 @@ function ui.update(dt)
     local barWidth = ui.bar:getWidth() - (2 * ui.config.progress.offset.x)
 
     if ui.progress.isResetting then
-        ui.progress.progressWidth = lerp(
+        ui.progress.progressWidth = utils.lerp(
             ui.progress.progressWidth, 
             0,
             dt * ui.config.progress.resetAnimationSpeed
@@ -93,7 +97,7 @@ function ui.update(dt)
     else
         local targetWidth = barWidth * (ui.progress.current / ui.progress.total)
         
-        ui.progress.progressWidth = math.max(0, math.min(barWidth, lerp(
+        ui.progress.progressWidth = math.max(0, math.min(barWidth, utils.lerp(
             ui.progress.progressWidth, 
             targetWidth,
             dt * ui.config.progress.animationSpeed
@@ -139,7 +143,6 @@ function ui.draw()
         )
     end
     
-    -- Draw hearts
     local heartScale = ui.config.hearts.scale
     local heartX = ui.config.hearts.margin
     local heartY = ui.config.hearts.margin
@@ -169,10 +172,6 @@ function ui.draw()
         
         heartX = heartX + heartWidth + ui.config.hearts.spacing
     end
-end
-
-function lerp(a, b, t)
-	return a + (b - a) * t
 end
 
 return ui

@@ -9,6 +9,7 @@ local projectile = require("projectile")
 local particle = require("particle")
 
 local gameState = require("gameState")
+local upgradeMenu = require("upgradeMenu")
 
 local ui = require("ui")
 
@@ -28,9 +29,16 @@ function love.load()
     projectile.load()
     particle.load()
     ui.load()
+    upgradeMenu.load()
 end
 
 function love.update(dt)
+    if gameState.paused then
+        upgradeMenu.update(dt)
+        ui.update(dt)
+        return
+    end
+    
     player.update(dt)
     net.update(dt)
     enemy.update(dt)
@@ -40,9 +48,19 @@ function love.update(dt)
     ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
     
     ui.update(dt)
+
+    if player.health <= 0 then
+        love.event.quit("restart")
+    end
 end
 
 function love.mousepressed(x, y, button)
+    if gameState.pausedForUpgrade then
+        if upgradeMenu.mousepressed(x, y, button) then
+            return
+        end
+    end
+    
     net.mousepressed(x, y, button)
 end
 
@@ -60,6 +78,8 @@ function love.draw()
     particle.draw()
 
     ui.draw()
+    
+    upgradeMenu.draw()
 
     drawCursor()
 

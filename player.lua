@@ -10,6 +10,12 @@ player.config = {
     
     speed = 100,
     spinSpeed = 2,
+    
+    maxHealth = 3,
+    invincibilityDuration = 2,
+    flashInterval = 0.1,
+
+    collisionWiggleRoom = 2,
 }
 
 function player.load()
@@ -26,6 +32,12 @@ function player.load()
     player.angleSnapFactor = config.visual.angleSnapFactor
     
     player.controls = config.controls.movement
+    
+    player.health = player.config.maxHealth
+    player.isInvincible = false
+    player.invincibilityTimer = 0
+    player.flashTimer = 0
+    player.visible = true
 end
 
 function player.update(dt)
@@ -69,9 +81,29 @@ function player.update(dt)
     )
 
     player.angle = player.angle + player.config.spinSpeed * dt
+
+    if player.isInvincible then
+        player.invincibilityTimer = player.invincibilityTimer + dt
+        
+        player.flashTimer = player.flashTimer + dt
+        if player.flashTimer >= player.config.flashInterval then
+            player.visible = not player.visible
+            player.flashTimer = player.flashTimer - player.config.flashInterval
+        end
+        
+        if player.invincibilityTimer >= player.config.invincibilityDuration then
+            player.isInvincible = false
+            player.visible = true
+            player.invincibilityTimer = 0
+        end
+    end
 end
 
 function player.draw()
+    if not player.visible then
+        return
+    end
+    
     local px = math.floor(player.x)
     local py = math.floor(player.y)
     local ox = player.sprite:getWidth() / 2
@@ -89,6 +121,25 @@ function player.draw()
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(player.sprite, px, py, angle, 1, 1, ox, oy)
+end
+
+function player.takeDamage()
+    if player.isInvincible then return end
+    
+    player.health = player.health - 1
+    player.isInvincible = true
+    player.invincibilityTimer = 0
+    player.flashTimer = 0
+    player.visible = true
+    
+    local ui = require("ui")
+    ui.setHealth(player.health)
+end
+
+function player.getCollisionRadius()
+    local width = player.sprite:getWidth()
+    
+    return math.max(width) / player.config.collisionWiggleRoom
 end
 
 return player

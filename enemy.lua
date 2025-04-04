@@ -4,7 +4,7 @@ local config = require("config")
 local assets = require("assets")
 local player = require("player")
 local particle = require("particle")
-
+local upgradeMenu = require("upgradeMenu")
 local gameState = require("gameState")
 
 enemy.config = {
@@ -76,7 +76,8 @@ function enemy.kill(e)
     if gameState.stats.waveKills >= gameState.killsPerWave then
         gameState.stats.waveKills = 0
         gameState.stats.currentWave = gameState.stats.currentWave + 1
-        -- update wave completion logic here
+        
+        upgradeMenu.show()
     end
     
     local particleCount = math.random(
@@ -151,6 +152,30 @@ function enemy.calculateSeparation(currentEnemy)
     return separationX, separationY
 end
 
+function enemy.checkRotatedRectangleCollision(e, playerX, playerY, playerRadius)
+    local enemyWidth = enemy.sprite:getWidth()
+    local enemyHeight = enemy.sprite:getHeight()
+    
+    local halfWidth = enemyWidth / 2
+    local halfHeight = enemyHeight / 2
+    
+    local dx = playerX - e.x
+    local dy = playerY - e.y
+    
+    local angle = -e.angle
+    local rotX = dx * math.cos(angle) - dy * math.sin(angle)
+    local rotY = dx * math.sin(angle) + dy * math.cos(angle)
+    
+    local closestX = math.max(-halfWidth, math.min(halfWidth, rotX))
+    local closestY = math.max(-halfHeight, math.min(halfHeight, rotY))
+    
+    local distX = rotX - closestX
+    local distY = rotY - closestY
+    local distSquared = distX * distX + distY * distY
+    
+    return distSquared <= (playerRadius * playerRadius)
+end
+
 function enemy.update(dt)
     enemy.spawnTimer = enemy.spawnTimer + dt
     
@@ -180,6 +205,17 @@ function enemy.update(dt)
             local dy = player.y - e.y
             
             local len = math.sqrt(dx * dx + dy * dy)
+            
+            local playerRadius = player.getCollisionRadius()
+            
+            -- quick check for collision optimization
+            if len < (15 + playerRadius) then
+                if enemy.checkRotatedRectangleCollision(e, player.x, player.y, playerRadius) 
+                   and not player.isInvincible then
+                    player.takeDamage()
+                end
+            end
+            
             if len > 0 then
                 dx, dy = dx / len, dy / len
             end

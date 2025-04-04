@@ -4,7 +4,9 @@ local gameState = {
         killCount = 0,
         waveKills = 0,
         currentWave = 1
-    }
+    },
+    paused = false,
+    pausedForUpgrade = false
 }
 
 return gameState
