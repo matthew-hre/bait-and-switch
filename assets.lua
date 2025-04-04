@@ -40,6 +40,7 @@ function assets.load()
     assets.fonts.m5x7 = love.graphics.newFont("assets/fonts/m5x7.ttf", 16)
     assets.fonts.m5x7:setFilter("nearest", "nearest")
     
+    assets.primaryColor = {1, 0.6, 0.2, 1} -- Orange/fire color
     assets.shadowColor = config.visual.shadowColor
 end
 

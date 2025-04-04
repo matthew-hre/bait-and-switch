@@ -3,6 +3,7 @@ local player = {}
 local config = require("config")
 local assets = require("assets")
 local gameState = require("gameState")
+local particle = require("particle")
 
 player.config = {
     startX = 128,
@@ -16,6 +17,17 @@ player.config = {
     flashInterval = 0.1,
 
     collisionWiggleRoom = 2,
+    
+    death = {
+        minParticles = 15,
+        maxParticles = 20,
+        minScale = 0.8,
+        maxScale = 1.5,
+        minScaleDecay = 0.8,
+        maxScaleDecay = 1.2,
+        maxRotationSpeed = 8,
+        maxVelocity = 80
+    }
 }
 
 function player.load()
@@ -38,9 +50,12 @@ function player.load()
     player.invincibilityTimer = 0
     player.flashTimer = 0
     player.visible = true
+    player.dead = false
 end
 
 function player.update(dt)
+    if player.dead then return end
+    
     local dx, dy = 0, 0
     
     for _, key in ipairs(player.controls.up) do
@@ -100,7 +115,7 @@ function player.update(dt)
 end
 
 function player.draw()
-    if not player.visible then
+    if player.dead or not player.visible then
         return
     end
     
@@ -123,6 +138,51 @@ function player.draw()
     love.graphics.draw(player.sprite, px, py, angle, 1, 1, ox, oy)
 end
 
+function player.createDeathParticles()
+    local particleCount = math.random(
+        player.config.death.minParticles,
+        player.config.death.maxParticles
+    )
+    
+    for i = 1, particleCount do
+        local scale = math.random() * 
+            (player.config.death.maxScale - player.config.death.minScale) + 
+            player.config.death.minScale
+            
+        local scaleDecay = math.random() * 
+            (player.config.death.maxScaleDecay - player.config.death.minScaleDecay) + 
+            player.config.death.minScaleDecay
+            
+        local angle = math.random() * math.pi * 2
+        local rotation = (math.random() * 2 - 1) * player.config.death.maxRotationSpeed
+        
+        local speed = math.random() * player.config.death.maxVelocity
+        local vx = math.cos(angle) * speed
+        local vy = math.sin(angle) * speed
+        
+        local whiteSquare = love.graphics.newCanvas(4, 4)
+        love.graphics.setCanvas(whiteSquare)
+        love.graphics.clear()
+
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("fill", 0, 0, 4, 4)
+        love.graphics.setCanvas()
+        
+        local particleOptions = {
+            scale = scale,
+            scaleDecay = scaleDecay,
+            angle = angle,
+            rotation = rotation,
+            vx = vx,
+            vy = vy,
+            shadowOffset = player.shadowOffset,
+            color = {1, 1, 1, 1}
+        }
+        
+        particle.create(player.x, player.y, whiteSquare, particleOptions)
+    end
+end
+
 function player.takeDamage()
     if player.isInvincible then return end
     
@@ -134,6 +194,31 @@ function player.takeDamage()
     
     local ui = require("ui")
     ui.setHealth(player.health)
+    
+    if player.health <= 0 then
+        player.createDeathParticles()
+        player.dead = true
+        
+        local net = require("net")
+        net.visible = false
+        
+        ui.startSlideOut()
+        
+        local projectile = require("projectile")
+        projectile.clearAllBounces()
+        
+        local deathScreen = require("deathScreen")
+        
+        local enemy = require("enemy")
+        for _, e in ipairs(enemy.active) do
+            if not e.caught and not e.dead then
+                enemy.kill(e)
+            end
+        end
+        
+        gameState.deathScreen.deathAnimationDelay = 1.5
+        gameState.deathScreen.showDeathScreen = true
+    end
 end
 
 function player.getCollisionRadius()

@@ -60,6 +60,12 @@ function projectile.create(x, y, targetX, targetY)
     return p
 end
 
+function projectile.clearAllBounces()
+    for _, p in ipairs(projectile.active) do
+        p.bouncesRemaining = 0
+    end
+end
+
 function projectile.update(dt)
     for i = #projectile.active, 1, -1 do
         local p = projectile.active[i]

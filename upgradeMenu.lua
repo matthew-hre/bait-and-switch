@@ -125,6 +125,8 @@ end
 function upgradeMenu.show()
     if upgradeMenu.visible then return end
     
+    gameState.killsPerWave = math.ceil(gameState.killsPerWave * gameState.waveScaleFactor)
+    
     upgradeMenu.visible = true
     upgradeMenu.isAnimating = true
     upgradeMenu.isExiting = false

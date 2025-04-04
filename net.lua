@@ -15,7 +15,9 @@ net.config = {
     followDistance = 16,
     collisionRadius = 12,
     
-    mouseScale = 4
+    mouseScale = 4,
+
+    ease = 40
 }
 
 function net.load()
@@ -25,8 +27,8 @@ function net.load()
 
     net.player = playerRef
 
-    net.x = 0
-    net.y = 0
+    net.x = config.screen.width / 2
+    net.y = config.screen.height / 2 -- kinda centered
     net.angle = 0
     net.scaleY = 1
 
@@ -42,6 +44,8 @@ function net.load()
     net.swingHoldTimer = 0
     
     net.netButton = config.controls.action.net
+    
+    net.visible = true
 end
 
 function net.update(dt)
@@ -61,7 +65,7 @@ function net.update(dt)
     local targetX = net.player.x + math.cos(positioningAngle) * net.config.followDistance
     local targetY = net.player.y + math.sin(positioningAngle) * net.config.followDistance
 
-    local ease = 30 * dt
+    local ease = net.config.ease * dt
     net.x = net.x + (targetX - net.x) * ease
     net.y = net.y + (targetY - net.y) * ease
 
@@ -133,6 +137,10 @@ function net.checkEnemyCollision()
 end
 
 function net.draw()
+    if not net.visible then
+        return
+    end
+    
     local ox = net.sprite:getWidth() / 2
     local oy = 0 -- top center
 

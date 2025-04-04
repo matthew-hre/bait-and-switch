@@ -10,6 +10,7 @@ local particle = require("particle")
 
 local gameState = require("gameState")
 local upgradeMenu = require("upgradeMenu")
+local deathScreen = require("deathScreen")
 
 local ui = require("ui")
 
@@ -33,28 +34,34 @@ function love.load()
 end
 
 function love.update(dt)
+    particle.update(dt)
+    
+    ui.update(dt)
+    
+    projectile.update(dt)
+    
+    if gameState.deathScreen.showDeathScreen then
+        deathScreen.update(dt)
+        return
+    end
+    
     if gameState.paused then
         upgradeMenu.update(dt)
-        ui.update(dt)
         return
     end
     
     player.update(dt)
     net.update(dt)
     enemy.update(dt)
-    projectile.update(dt)
-    particle.update(dt)
     
     ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
-    
-    ui.update(dt)
-
-    if player.health <= 0 then
-        love.event.quit("restart")
-    end
 end
 
 function love.mousepressed(x, y, button)
+    if gameState.deathScreen.active or gameState.deathScreen.showDeathScreen then
+        return
+    end
+
     if gameState.pausedForUpgrade then
         if upgradeMenu.mousepressed(x, y, button) then
             return
@@ -71,17 +78,31 @@ function love.draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(assets.bg, 0, 0)
 
-    player.draw()
+    if not player.dead then
+        player.draw()
+    end
+    
     enemy.draw()
+    
     net.draw()
+    
     projectile.draw()
+
     particle.draw()
 
     ui.draw()
     
-    upgradeMenu.draw()
+    if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
+        upgradeMenu.draw()
+    end
 
-    drawCursor()
+    if gameState.deathScreen.active then
+        deathScreen.draw()
+    end
+
+    if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
+        drawCursor()
+    end
 
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1)

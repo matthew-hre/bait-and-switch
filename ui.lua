@@ -18,6 +18,7 @@ ui.config = {
         animationSpeed = 5,
         resetAnimationSpeed = 8,
         shadowOffset = 2,
+        slideOutSpeed = 6,
     },
 
     hearts = {
@@ -33,7 +34,9 @@ ui.progress = {
     total = 5,
     progressWidth = 0,
     isResetting = false,
-    resetStartWidth = 0
+    resetStartWidth = 0,
+    slideOut = false, 
+    yOffset = 0 
 }
 
 ui.hearts = {
@@ -64,6 +67,9 @@ function ui.load()
     
     ui.hearts.max = player.config.maxHealth
     ui.hearts.current = player.health
+
+    ui.progress.slideOut = false
+    ui.progress.yOffset = 0
 end
 
 function ui.setProgress(current, total)
@@ -80,8 +86,19 @@ function ui.setHealth(health)
     ui.hearts.current = math.max(0, math.min(ui.hearts.max, health))
 end
 
+function ui.startSlideOut()
+    ui.progress.slideOut = true
+end
+
 function ui.update(dt)
     local barWidth = ui.bar:getWidth() - (2 * ui.config.progress.offset.x)
+
+    if ui.progress.slideOut then
+        ui.progress.yOffset = ui.progress.yOffset + 
+            (ui.bar:getHeight() + ui.config.progress.margin * 2) * dt * ui.config.progress.slideOutSpeed
+        
+        return
+    end
 
     if ui.progress.isResetting then
         ui.progress.progressWidth = utils.lerp(
@@ -110,21 +127,21 @@ function ui.draw()
     love.graphics.draw(
         ui.bar, 
         ui.barX + ui.config.progress.shadowOffset, 
-        ui.barY + ui.config.progress.shadowOffset
+        ui.barY + ui.config.progress.shadowOffset + ui.progress.yOffset
     )
 
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(
         ui.bar, 
         ui.barX, 
-        ui.barY
+        ui.barY + ui.progress.yOffset
     )
     
     if ui.progress.progressWidth > 0 then
         love.graphics.setColor(ui.fillColor)
         
         local fillX = ui.barX + ui.config.progress.offset.x
-        local fillY = ui.barY + ui.config.progress.offset.y
+        local fillY = ui.barY + ui.config.progress.offset.y + ui.progress.yOffset
         
         love.graphics.rectangle(
             "fill",

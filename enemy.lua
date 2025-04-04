@@ -11,8 +11,8 @@ enemy.config = {
     initialSpawnInterval = 1.5,
     minSpawnInterval = 2.0,
     maxSpawnInterval = 3.0,
-    minSpawnCount = 2,
-    maxSpawnCount = 3,
+    baseMinSpawnCount = 2,
+    baseMaxSpawnCount = 3,
     spawnYPosition = -20,
     spawnMargin = 20,
     
@@ -185,10 +185,11 @@ function enemy.update(dt)
             (enemy.config.maxSpawnInterval - enemy.config.minSpawnInterval) + 
             enemy.config.minSpawnInterval
         
-        local spawnCount = math.random(
-            enemy.config.minSpawnCount, 
-            enemy.config.maxSpawnCount
-        )
+        local waveBonus = math.min(10, gameState.stats.currentWave - 1)
+        local minSpawnCount = enemy.config.baseMinSpawnCount + waveBonus
+        local maxSpawnCount = enemy.config.baseMaxSpawnCount + waveBonus
+        
+        local spawnCount = math.random(minSpawnCount, maxSpawnCount)
         
         for i = 1, spawnCount do
             enemy.createEnemy()
