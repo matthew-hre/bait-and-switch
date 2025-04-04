@@ -11,7 +11,7 @@ projectile.config = {
     
     particleDelay = 0.02,
     
-    margin = 20,
+    margin = 2, -- screen edge margin for bouncing
     
     particle = {
         minScale = 0.2,
@@ -22,7 +22,10 @@ projectile.config = {
         maxVelocity = 20
     },
     
-    collisionRadius = 12
+    collisionRadius = 12,
+    
+    maxBounces = 0,
+    bounceDamping = 0.99
 }
 
 projectile.active = {}
@@ -34,6 +37,8 @@ function projectile.load()
     projectile.screenWidth = config.screen.width
     projectile.screenHeight = config.screen.height
     projectile.shadowOffset = config.visual.shadowOffset
+    
+    projectile.size = 1
 end
 
 function projectile.create(x, y, targetX, targetY)
@@ -48,6 +53,8 @@ function projectile.create(x, y, targetX, targetY)
     p.vy = math.sin(p.angle) * projectile.config.speed
     
     p.hitEnemies = {}
+    
+    p.bouncesRemaining = projectile.config.maxBounces
     
     table.insert(projectile.active, p)
     return p
@@ -92,10 +99,47 @@ function projectile.update(dt)
         
         projectile.checkEnemyCollision(p)
         
-        if p.x < -projectile.config.margin or 
-           p.x > projectile.screenWidth + projectile.config.margin or
-           p.y < -projectile.config.margin or 
-           p.y > projectile.screenHeight + projectile.config.margin then
+        local bounced = false
+        local margin = projectile.config.margin
+        
+        if p.x < margin and p.vx < 0 then
+            if p.bouncesRemaining > 0 then
+                p.vx = -p.vx * projectile.config.bounceDamping
+                p.x = margin
+                p.bouncesRemaining = p.bouncesRemaining - 1
+                bounced = true
+            end
+        elseif p.x > projectile.screenWidth - margin and p.vx > 0 then
+            if p.bouncesRemaining > 0 then
+                p.vx = -p.vx * projectile.config.bounceDamping
+                p.x = projectile.screenWidth - margin
+                p.bouncesRemaining = p.bouncesRemaining - 1
+                bounced = true
+            end
+        end
+        
+        if p.y < margin and p.vy < 0 then
+            if p.bouncesRemaining > 0 then
+                p.vy = -p.vy * projectile.config.bounceDamping
+                p.y = margin
+                p.bouncesRemaining = p.bouncesRemaining - 1
+                bounced = true
+            end
+        elseif p.y > projectile.screenHeight - margin and p.vy > 0 then
+            if p.bouncesRemaining > 0 then
+                p.vy = -p.vy * projectile.config.bounceDamping
+                p.y = projectile.screenHeight - margin
+                p.bouncesRemaining = p.bouncesRemaining - 1
+                bounced = true
+            end
+        end
+        
+        if bounced then
+            p.angle = math.atan2(p.vy, p.vx)
+        end
+        
+        if p.x < -margin or p.x > projectile.screenWidth + margin or
+           p.y < -margin or p.y > projectile.screenHeight + margin then
             table.remove(projectile.active, i)
         end
     end
@@ -125,17 +169,20 @@ function projectile.draw()
         local oy = projectile.sprite:getHeight() / 2
         
         local drawAngle = p.angle + math.pi/2
+        local scale = projectile.size or 1
         
         love.graphics.setColor(projectile.shadowColor)
         love.graphics.draw(
             projectile.sprite, 
             px + projectile.shadowOffset, 
             py + projectile.shadowOffset, 
-            drawAngle, 1, 1, ox, oy
+            drawAngle, scale, scale, ox, oy
         )
         
         love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(projectile.sprite, px, py, drawAngle, 1, 1, ox, oy)
+        love.graphics.draw(
+            projectile.sprite, px, py, drawAngle, scale, scale, ox, oy
+        )
     end
 end
 
