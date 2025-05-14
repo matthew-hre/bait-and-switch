@@ -13,6 +13,14 @@ function assets.load()
 
     assets.enemySprite = love.graphics.newImage("assets/enemy.png")
     
+    -- create this here as not to bog down the particle system
+    assets.whiteSquare = love.graphics.newCanvas(4, 4)
+    love.graphics.setCanvas(assets.whiteSquare)
+    love.graphics.clear()
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("fill", 0, 0, 4, 4)
+    love.graphics.setCanvas()
+    
     assets.ui = {}
     assets.ui.progress = love.graphics.newImage("assets/ui/progress.png")
     assets.ui.progressBar = love.graphics.newImage("assets/ui/progressBar.png")

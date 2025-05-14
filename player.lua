@@ -160,14 +160,6 @@ function player.createDeathParticles()
         local vx = math.cos(angle) * speed
         local vy = math.sin(angle) * speed
         
-        local whiteSquare = love.graphics.newCanvas(4, 4)
-        love.graphics.setCanvas(whiteSquare)
-        love.graphics.clear()
-
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("fill", 0, 0, 4, 4)
-        love.graphics.setCanvas()
-        
         local particleOptions = {
             scale = scale,
             scaleDecay = scaleDecay,
@@ -179,7 +171,7 @@ function player.createDeathParticles()
             color = {1, 1, 1, 1}
         }
         
-        particle.create(player.x, player.y, whiteSquare, particleOptions)
+        particle.create(player.x, player.y, assets.whiteSquare, particleOptions)
     end
 end
 
