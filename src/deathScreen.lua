@@ -1,8 +1,8 @@
 local deathScreen = {}
 
-local config = require("config")
-local assets = require("assets")
-local gameState = require("gameState")
+local config = require("src.config")
+local assets = require("src.assets")
+local gameState = require("src.gameState")
 
 deathScreen.config = {
     textRevealDelay = 1,
@@ -25,7 +25,7 @@ function deathScreen.init()
     gameState.deathScreen.textRevealTimer = 0
     gameState.deathScreen.displayedLines = 0
 
-    local projectile = require("projectile")
+    local projectile = require("src.projectile")
     projectile.clearAllBounces()
 
     deathScreen.lines = {
@@ -53,12 +53,12 @@ function deathScreen.resetGame()
     
     gameState.deathScreen.bestWave = bestWave
     
-    local player = require("player")
-    local enemy = require("enemy")
-    local projectile = require("projectile")
-    local net = require("net")
-    local ui = require("ui")
-    local tutorial = require("tutorial")
+    local player = require("src.player")
+    local enemy = require("src.enemy")
+    local projectile = require("src.projectile")
+    local net = require("src.net")
+    local ui = require("src.ui")
+    local tutorial = require("src.tutorial")
     
     enemy.active = {}
     projectile.active = {}

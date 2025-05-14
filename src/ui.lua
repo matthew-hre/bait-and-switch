@@ -1,10 +1,10 @@
 local ui = {}
 
-local config = require("config")
-local assets = require("assets")
-local gameState = require("gameState")
-local player = require("player")
-local utils = require("utils")
+local config = require("src.config")
+local assets = require("src.assets")
+local gameState = require("src.gameState")
+local player = require("src.player")
+local utils = require("src.utils")
 
 ui.config = {
     progress = {

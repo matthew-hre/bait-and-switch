@@ -1,9 +1,9 @@
 local pauseMenu = {}
 
-local config = require("config")
-local assets = require("assets")
-local gameState = require("gameState")
-local utils = require("utils")
+local config = require("src.config")
+local assets = require("src.assets")
+local gameState = require("src.gameState")
+local utils = require("src.utils")
 local input = require("src.input")
 
 pauseMenu.config = {

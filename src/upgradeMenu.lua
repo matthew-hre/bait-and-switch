@@ -1,9 +1,9 @@
 local upgradeMenu = {}
 
-local config = require("config")
-local assets = require("assets")
-local gameState = require("gameState")
-local utils = require("utils")
+local config = require("src.config")
+local assets = require("src.assets")
+local gameState = require("src.gameState")
+local utils = require("src.utils")
 local input = require("src.input")
 
 upgradeMenu.config = {
@@ -33,8 +33,8 @@ upgradeMenu.config = {
 }
 
 function upgradeMenu.load()
-    local player = require("player")
-    local projectile = require("projectile")
+    local player = require("src.player")
+    local projectile = require("src.projectile")
     
     upgradeMenu.popup = assets.ui.popup
     upgradeMenu.shadowColor = assets.shadowColor
@@ -66,7 +66,7 @@ function upgradeMenu.load()
             description = "bug kissed u. heal +2", 
             image = assets.ui.upgrades.heart,
             effect = function()
-                local ui = require("ui")
+                local ui = require("src.ui")
                 player.health = math.min(player.config.maxHealth, player.health + 2)
                 ui.setHealth(player.health)
             end

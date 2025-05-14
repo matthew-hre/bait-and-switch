@@ -1,6 +1,6 @@
 local input = {}
 
-local config = require("config")
+local config = require("src.config")
 
 input.buttonsDown = {}
 input.buttonsPressed = {}
@@ -24,13 +24,15 @@ function input.load()
     input.screenScale = config.screen.scale
 end
 
-function input.update()
-    input.buttonsPressed = {}
-    input.buttonsReleased = {}
-    
+function input.update()    
     input.mouse.x, input.mouse.y = love.mouse.getPosition()
     input.mouse.scaledX = input.mouse.x / input.screenScale
     input.mouse.scaledY = input.mouse.y / input.screenScale
+end
+
+function input.clear()
+    input.buttonsPressed = {}
+    input.buttonsReleased = {}
 end
 
 function input.isMovementDown(direction)

@@ -1,8 +1,8 @@
 local particle = {}
 
-local assets = require("assets")
-local config = require("config")
-local gameState = require("gameState")
+local assets = require("src.assets")
+local config = require("src.config")
+local gameState = require("src.gameState")
 
 particle.config = {
     defaultScale = 0.5,

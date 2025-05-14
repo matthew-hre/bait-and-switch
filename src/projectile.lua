@@ -1,10 +1,10 @@
 local projectile = {}
 
-local config = require("config")
-local assets = require("assets")
-local particle = require("particle")
-local enemy = require("enemy")
-local gameState = require("gameState")
+local config = require("src.config")
+local assets = require("src.assets")
+local particle = require("src.particle")
+local enemy = require("src.enemy")
+local gameState = require("src.gameState")
 
 projectile.config = {
     speed = 350,

@@ -1,11 +1,11 @@
 local enemy = {}
 
-local config = require("config")
-local assets = require("assets")
-local player = require("player")
-local particle = require("particle")
-local upgradeMenu = require("upgradeMenu")
-local gameState = require("gameState")
+local config = require("src.config")
+local assets = require("src.assets")
+local player = require("src.player")
+local particle = require("src.particle")
+local upgradeMenu = require("src.upgradeMenu")
+local gameState = require("src.gameState")
 
 enemy.config = {
     initialSpawnInterval = 1.5,

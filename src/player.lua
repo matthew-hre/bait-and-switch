@@ -1,10 +1,11 @@
 local player = {}
 
-local config = require("config")
-local assets = require("assets")
-local gameState = require("gameState")
-local particle = require("particle")
+local config = require("src.config")
+local assets = require("src.assets")
+local gameState = require("src.gameState")
+local particle = require("src.particle")
 local input = require("src.input")
+
 
 player.config = {
     startX = 128,
@@ -163,8 +164,7 @@ function player.takeDamage()
     player.invincibilityTimer = 0
     player.flashTimer = 0
     player.visible = true
-    
-    local ui = require("ui")
+    local ui = require("src.ui")
     ui.setHealth(player.health)
     
     if player.health <= 0 then

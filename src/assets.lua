@@ -1,6 +1,6 @@
 local assets = {}
 
-local config = require("config")
+local config = require("src.config")
 
 function assets.load()
     assets.bg = love.graphics.newImage("assets/bg.png")

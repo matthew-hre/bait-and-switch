@@ -1,10 +1,10 @@
 local tutorial = {}
 
-local assets = require("assets")
-local player = require("player")
-local enemy = require("enemy")
-local gameState = require("gameState")
-local config = require("config")
+local assets = require("src.assets")
+local player = require("src.player")
+local enemy = require("src.enemy")
+local gameState = require("src.gameState")
+local config = require("src.config")
 local input = require("src.input")
 
 tutorial.config = {

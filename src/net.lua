@@ -1,12 +1,12 @@
 local net = {}
 
-local config = require("config")
-local assets = require("assets")
-local playerRef = require("player")
+local config = require("src.config")
+local assets = require("src.assets")
+local playerRef = require("src.player")
 local input = require("src.input")
 
-local projectile = require("projectile")
-local gameState = require("gameState")
+local projectile = require("src.projectile")
+local gameState = require("src.gameState")
 
 net.config = {
     swingOutSpeed = 20,
@@ -111,7 +111,7 @@ function net.mousepressed(x, y, button)
 end
 
 function net.checkEnemyCollision()
-    local enemy = require("enemy")
+    local enemy = require("src.enemy")
     
     local netTipX = net.x + math.sin(net.angle) * net.sprite:getHeight()
     local netTipY = net.y - math.cos(net.angle) * net.sprite:getHeight()
