@@ -44,6 +44,9 @@ function particle.update(dt)
         return
     end
     
+    -- Pull frequently used functions into local variables
+    local ipairs = ipairs
+    
     for i = #particle.active, 1, -1 do
         local p = particle.active[i]
         
@@ -63,32 +66,41 @@ function particle.update(dt)
 end
 
 function particle.draw()
+    -- Pull frequently used functions into local variables
+    local ipairs = ipairs
+    local floor = math.floor
+    local shadowColor = particle.shadowColor
+    
     for _, p in ipairs(particle.active) do
-        local px = math.floor(p.x)
-        local py = math.floor(p.y)
-        local ox = p.sprite:getWidth() / 2
-        local oy = p.sprite:getHeight() / 2
+        local px = floor(p.x)
+        local py = floor(p.y)
+        local sprite = p.sprite
+        local ox = sprite:getWidth() / 2
+        local oy = sprite:getHeight() / 2
+        local scale = p.scale
+        local angle = p.angle
+        local shadowOffset = p.shadowOffset
         
-        love.graphics.setColor(particle.shadowColor)
+        love.graphics.setColor(shadowColor)
         love.graphics.draw(
-            p.sprite, 
-            px + p.shadowOffset * p.scale, 
-            py + p.shadowOffset * p.scale, 
-            p.angle, 
-            p.scale, 
-            p.scale, 
+            sprite, 
+            px + shadowOffset * scale, 
+            py + shadowOffset * scale, 
+            angle, 
+            scale, 
+            scale, 
             ox, 
             oy
         )
         
         love.graphics.setColor(p.color)
         love.graphics.draw(
-            p.sprite, 
+            sprite, 
             px, 
             py, 
-            p.angle, 
-            p.scale, 
-            p.scale, 
+            angle, 
+            scale, 
+            scale, 
             ox, 
             oy
         )

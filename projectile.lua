@@ -71,6 +71,15 @@ function projectile.update(dt)
         return
     end
     
+    local sqrt = math.sqrt
+    local random = math.random
+    local atan2 = math.atan2
+    local cos = math.cos
+    local sin = math.sin
+    local ipairs = ipairs
+    local spriteWidth, spriteHeight = projectile.sprite:getWidth(), projectile.sprite:getHeight()
+    local checkEnemyCollision = projectile.checkEnemyCollision
+    
     for i = #projectile.active, 1, -1 do
         local p = projectile.active[i]
         
@@ -81,17 +90,17 @@ function projectile.update(dt)
         
         if p.particleTimer >= projectile.config.particleDelay then
 
-            local scale = math.random() * 
+            local scale = random() * 
                 (projectile.config.particle.maxScale - projectile.config.particle.minScale) + 
                 projectile.config.particle.minScale
 
-            local scaleDecay = math.random() *
+            local scaleDecay = random() *
                 (projectile.config.particle.maxScaleDecay - projectile.config.particle.minScaleDecay) + 
                 projectile.config.particle.minScaleDecay
 
-            local rotation = (math.random() * 2 - 1) * projectile.config.particle.maxRotationSpeed
-            local vx = (math.random() * 2 - 1) * projectile.config.particle.maxVelocity
-            local vy = (math.random() * 2 - 1) * projectile.config.particle.maxVelocity
+            local rotation = (random() * 2 - 1) * projectile.config.particle.maxRotationSpeed
+            local vx = (random() * 2 - 1) * projectile.config.particle.maxVelocity
+            local vy = (random() * 2 - 1) * projectile.config.particle.maxVelocity
 
             local particleOptions = {
                 scale = scale,
@@ -107,7 +116,7 @@ function projectile.update(dt)
             p.particleTimer = 0
         end
         
-        projectile.checkEnemyCollision(p)
+        checkEnemyCollision(p)
         
         local bounced = false
         local margin = projectile.config.margin
@@ -145,7 +154,7 @@ function projectile.update(dt)
         end
         
         if bounced then
-            p.angle = math.atan2(p.vy, p.vx)
+            p.angle = atan2(p.vy, p.vx)
         end
         
         if p.x < -margin or p.x > projectile.screenWidth + margin or
@@ -156,13 +165,17 @@ function projectile.update(dt)
 end
 
 function projectile.checkEnemyCollision(proj)
-    for i, e in ipairs(enemy.active) do
+    local sqrt = math.sqrt
+    local ipairs = ipairs
+    local collisionRadius = projectile.config.collisionRadius
+    
+    for _, e in ipairs(enemy.active) do
         if not e.caught and not e.dead and not proj.hitEnemies[e] then
             local dx = proj.x - e.x
             local dy = proj.y - e.y
-            local distance = math.sqrt(dx * dx + dy * dy)
+            local distance = sqrt(dx * dx + dy * dy)
             
-            if distance < projectile.config.collisionRadius then
+            if distance < collisionRadius then
                 proj.hitEnemies[e] = true
                 
                 enemy.kill(e)
@@ -172,26 +185,35 @@ function projectile.checkEnemyCollision(proj)
 end
 
 function projectile.draw()
+    local ipairs = ipairs
+    local floor = math.floor
+    local sprite = projectile.sprite
+    local spriteWidth = sprite:getWidth()
+    local spriteHeight = sprite:getHeight()
+    local shadowOffset = projectile.shadowOffset
+    local shadowColor = projectile.shadowColor
+    local pi = math.pi
+    
     for _, p in ipairs(projectile.active) do
-        local px = math.floor(p.x)
-        local py = math.floor(p.y)
-        local ox = projectile.sprite:getWidth() / 2
-        local oy = projectile.sprite:getHeight() / 2
+        local px = floor(p.x)
+        local py = floor(p.y)
+        local ox = spriteWidth / 2
+        local oy = spriteHeight / 2
         
-        local drawAngle = p.angle + math.pi/2
+        local drawAngle = p.angle + pi/2
         local scale = projectile.size or 1
         
-        love.graphics.setColor(projectile.shadowColor)
+        love.graphics.setColor(shadowColor)
         love.graphics.draw(
-            projectile.sprite, 
-            px + projectile.shadowOffset, 
-            py + projectile.shadowOffset, 
+            sprite, 
+            px + shadowOffset, 
+            py + shadowOffset, 
             drawAngle, scale, scale, ox, oy
         )
         
         love.graphics.setColor(1, 1, 1)
         love.graphics.draw(
-            projectile.sprite, px, py, drawAngle, scale, scale, ox, oy
+            sprite, px, py, drawAngle, scale, scale, ox, oy
         )
     end
 end
