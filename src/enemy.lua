@@ -6,6 +6,7 @@ local player = require("src.player")
 local particle = require("src.particle")
 local upgradeMenu = require("src.upgradeMenu")
 local gameState = require("src.gameState")
+local utils = require("src.utils")
 
 enemy.config = {
     initialSpawnInterval = 1.5,
@@ -281,16 +282,7 @@ function enemy.draw()
             
             local angle = math.floor(e.angle * enemy.angleSnapFactor) / enemy.angleSnapFactor
             
-            love.graphics.setColor(enemy.shadowColor)
-            love.graphics.draw(
-                enemy.sprite, 
-                px + enemy.shadowOffset, 
-                py + enemy.shadowOffset, 
-                angle, 1, 1, ox, oy
-            )
-            
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(enemy.sprite, px, py, angle, 1, 1, ox, oy)
+            utils.drawWithShadow(enemy.sprite, px, py, angle, 1, 1, ox, oy, enemy.shadowOffset, enemy.shadowColor)
         end
     end
 end

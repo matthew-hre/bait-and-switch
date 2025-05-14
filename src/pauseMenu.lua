@@ -133,11 +133,18 @@ function pauseMenu.draw()
     local popupX = (config.screen.width - pauseMenu.width) / 2
     local popupY = pauseMenu.y
     
-    love.graphics.setColor(pauseMenu.shadowColor)
-    love.graphics.draw(pauseMenu.popup, popupX + pauseMenu.config.popupShadow.x, popupY + pauseMenu.config.popupShadow.y)
-    
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(pauseMenu.popup, popupX, popupY)
+    utils.drawWithShadow(
+        pauseMenu.popup,
+        popupX,
+        popupY,
+        0, 
+        1, 
+        1, 
+        0, 
+        0, 
+        pauseMenu.config.popupShadow.x,
+        pauseMenu.shadowColor
+    )
     
     if not pauseMenu.isExiting then
         local titleX = popupX + pauseMenu.width / 2

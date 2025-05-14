@@ -123,18 +123,17 @@ function ui.update(dt)
 end
 
 function ui.draw()
-    love.graphics.setColor(ui.shadowColor)
-    love.graphics.draw(
-        ui.bar, 
-        ui.barX + ui.config.progress.shadowOffset, 
-        ui.barY + ui.config.progress.shadowOffset + ui.progress.yOffset
-    )
-
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(
+    utils.drawWithShadow(
         ui.bar, 
         ui.barX, 
-        ui.barY + ui.progress.yOffset
+        ui.barY + ui.progress.yOffset,
+        0,
+        1,
+        1,
+        0,
+        0,
+        ui.config.progress.shadowOffset,
+        ui.shadowColor
     )
     
     if ui.progress.progressWidth > 0 then
@@ -167,24 +166,17 @@ function ui.draw()
     local heartShadowOffset = ui.config.hearts.shadowOffset
     
     for i = 1, ui.hearts.current do
-        love.graphics.setColor(ui.shadowColor)
-        love.graphics.draw(
-            ui.heartImage,
-            heartX + heartShadowOffset,
-            heartY + heartShadowOffset,
-            0,
-            heartScale,
-            heartScale
-        )
-        
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(
+        utils.drawWithShadow(
             ui.heartImage,
             heartX,
             heartY,
             0,
             heartScale,
-            heartScale
+            heartScale,
+            0,
+            0,
+            heartShadowOffset,
+            ui.shadowColor
         )
         
         heartX = heartX + heartWidth + ui.config.hearts.spacing

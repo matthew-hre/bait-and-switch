@@ -8,6 +8,7 @@ local enemy = require("src.enemy")
 local projectile = require("src.projectile")
 local particle = require("src.particle")
 local tutorial = require("src.tutorial")
+local utils = require("src.utils")
 
 local gameState = require("src.gameState")
 local upgradeMenu = require("src.upgradeMenu")
@@ -185,9 +186,5 @@ function drawCursor()
     local oy = assets.cursor:getHeight() / 2
     local rot = love.timer.getTime() * 2
 
-    love.graphics.setColor(config.visual.shadowColor)
-    love.graphics.draw(assets.cursor, mx + 1, my + 1, rot, 1, 1, ox, oy)
-
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(assets.cursor, mx, my, rot, 1, 1, ox, oy)
+    utils.drawWithShadow(assets.cursor, mx, my, rot, 1, 1, ox, oy, 1, config.visual.shadowColor)
 end

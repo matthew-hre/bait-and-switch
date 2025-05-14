@@ -3,6 +3,7 @@ local deathScreen = {}
 local config = require("src.config")
 local assets = require("src.assets")
 local gameState = require("src.gameState")
+local utils = require("src.utils")
 
 deathScreen.config = {
     textRevealDelay = 1,
@@ -118,19 +119,21 @@ function deathScreen.draw()
         
         local textWidth = love.graphics.getFont():getWidth(text)
         local shadowOffset = (i == 1) and deathScreen.config.textStyle.titleShadowOffset or deathScreen.config.textStyle.textShadowOffset
+        local textX = math.floor(centerX - textWidth / 2)
+        local textY = math.floor(startY + (i-1) * deathScreen.config.textStyle.lineSpacing)
         
         love.graphics.setColor(assets.shadowColor)
         love.graphics.print(
             text, 
-            math.floor(centerX - textWidth / 2) + shadowOffset, 
-            math.floor(startY + (i-1) * deathScreen.config.textStyle.lineSpacing) + shadowOffset
+            textX + shadowOffset, 
+            textY + shadowOffset
         )
         
         love.graphics.setColor(1, 1, 1)
         love.graphics.print(
             text, 
-            math.floor(centerX - textWidth / 2), 
-            math.floor(startY + (i-1) * deathScreen.config.textStyle.lineSpacing)
+            textX, 
+            textY
         )
     end
 end

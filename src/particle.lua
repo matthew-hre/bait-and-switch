@@ -3,6 +3,7 @@ local particle = {}
 local assets = require("src.assets")
 local config = require("src.config")
 local gameState = require("src.gameState")
+local utils = require("src.utils")
 
 particle.config = {
     defaultScale = 0.5,
@@ -79,22 +80,9 @@ function particle.draw()
         local oy = sprite:getHeight() / 2
         local scale = p.scale
         local angle = p.angle
-        local shadowOffset = p.shadowOffset
+        local shadowOffset = p.shadowOffset * scale
         
-        love.graphics.setColor(shadowColor)
-        love.graphics.draw(
-            sprite, 
-            px + shadowOffset * scale, 
-            py + shadowOffset * scale, 
-            angle, 
-            scale, 
-            scale, 
-            ox, 
-            oy
-        )
-        
-        love.graphics.setColor(p.color)
-        love.graphics.draw(
+        utils.drawWithShadow(
             sprite, 
             px, 
             py, 
@@ -102,8 +90,24 @@ function particle.draw()
             scale, 
             scale, 
             ox, 
-            oy
+            oy,
+            shadowOffset,
+            shadowColor
         )
+        
+        if p.color[1] ~= 1 or p.color[2] ~= 1 or p.color[3] ~= 1 or p.color[4] ~= 1 then
+            love.graphics.setColor(p.color)
+            love.graphics.draw(
+                sprite, 
+                px, 
+                py, 
+                angle, 
+                scale, 
+                scale, 
+                ox, 
+                oy
+            )
+        end
     end
 end
 

@@ -4,6 +4,7 @@ local config = require("src.config")
 local assets = require("src.assets")
 local playerRef = require("src.player")
 local input = require("src.input")
+local utils = require("src.utils")
 
 local projectile = require("src.projectile")
 local gameState = require("src.gameState")
@@ -145,11 +146,7 @@ function net.draw()
     
     local currentSprite = net.loaded and net.loadedSprite or net.sprite
 
-    love.graphics.setColor(net.shadowColor)
-    love.graphics.draw(currentSprite, px + net.shadowOffset, py + net.shadowOffset, drawAngle, 1, net.scaleY, ox, oy)
-
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(currentSprite, px, py, drawAngle, 1, net.scaleY, ox, oy)
+    utils.drawWithShadow(currentSprite, px, py, drawAngle, 1, net.scaleY, ox, oy, net.shadowOffset, net.shadowColor)
 end
 
 return net

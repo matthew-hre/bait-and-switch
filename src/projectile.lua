@@ -5,6 +5,7 @@ local assets = require("src.assets")
 local particle = require("src.particle")
 local enemy = require("src.enemy")
 local gameState = require("src.gameState")
+local utils = require("src.utils")
 
 projectile.config = {
     speed = 350,
@@ -203,18 +204,7 @@ function projectile.draw()
         local drawAngle = p.angle + pi/2
         local scale = projectile.size or 1
         
-        love.graphics.setColor(shadowColor)
-        love.graphics.draw(
-            sprite, 
-            px + shadowOffset, 
-            py + shadowOffset, 
-            drawAngle, scale, scale, ox, oy
-        )
-        
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.draw(
-            sprite, px, py, drawAngle, scale, scale, ox, oy
-        )
+        utils.drawWithShadow(sprite, px, py, drawAngle, scale, scale, ox, oy, shadowOffset, shadowColor)
     end
 end
 

@@ -6,6 +6,7 @@ local enemy = require("src.enemy")
 local gameState = require("src.gameState")
 local config = require("src.config")
 local input = require("src.input")
+local utils = require("src.utils")
 
 tutorial.config = {
     walkIconOffset = -32,
@@ -92,19 +93,23 @@ function tutorial.drawElement(element)
         return
     end
     
-    love.graphics.setColor(tutorial.shadowColor[1], tutorial.shadowColor[2], tutorial.shadowColor[3], element.alpha)
-    love.graphics.draw(
-        element.icon, 
-        math.floor(element.x + tutorial.shadowOffset), 
-        math.floor(element.y + tutorial.shadowOffset)
-    )
-    
+    local originalColor = {love.graphics.getColor()}
     love.graphics.setColor(1, 1, 1, element.alpha)
-    love.graphics.draw(
+    
+    utils.drawWithShadow(
         element.icon, 
         math.floor(element.x), 
-        math.floor(element.y)
+        math.floor(element.y),
+        0, 
+        1, 
+        1, 
+        0, 
+        0, 
+        tutorial.shadowOffset,
+        {tutorial.shadowColor[1], tutorial.shadowColor[2], tutorial.shadowColor[3], element.alpha}
     )
+    
+    love.graphics.setColor(originalColor)
 end
 
 function tutorial.update(dt)

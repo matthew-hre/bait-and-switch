@@ -5,7 +5,7 @@ local assets = require("src.assets")
 local gameState = require("src.gameState")
 local particle = require("src.particle")
 local input = require("src.input")
-
+local utils = require("src.utils")
 
 player.config = {
     startX = 128,
@@ -107,16 +107,7 @@ function player.draw()
     
     local angle = math.floor(player.angle * player.angleSnapFactor) / player.angleSnapFactor
 
-    love.graphics.setColor(player.shadowColor)
-    love.graphics.draw(
-        player.sprite, 
-        px + player.shadowOffset, 
-        py + player.shadowOffset, 
-        angle, 1, 1, ox, oy
-    )
-
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(player.sprite, px, py, angle, 1, 1, ox, oy)
+    utils.drawWithShadow(player.sprite, px, py, angle, 1, 1, ox, oy, player.shadowOffset, player.shadowColor)
 end
 
 function player.createDeathParticles()

@@ -223,15 +223,20 @@ function upgradeMenu.draw()
     local popupX = (config.screen.width - upgradeMenu.width) / 2
     local popupY = upgradeMenu.y
     
-    love.graphics.setColor(upgradeMenu.shadowColor)
-    love.graphics.draw(upgradeMenu.popup, popupX + upgradeMenu.config.popupShadow.x, popupY + upgradeMenu.config.popupShadow.y)
-    
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(upgradeMenu.popup, popupX, popupY)
+    utils.drawWithShadow(
+        upgradeMenu.popup, 
+        popupX, 
+        popupY, 
+        0, 
+        1, 
+        1, 
+        0, 
+        0, 
+        upgradeMenu.config.popupShadow.x, 
+        upgradeMenu.shadowColor
+    )
     
     if not upgradeMenu.isExiting then
-        love.graphics.setColor(1, 1, 1)
-        
         local upgradeY = popupY + upgradeMenu.config.upgradesTopPadding
         for i, upgrade in ipairs(upgradeMenu.randomUpgrades) do
             local animState = upgradeMenu.textAnimationStates[i]
@@ -249,26 +254,29 @@ function upgradeMenu.draw()
                 rotation = math.sin(upgradeMenu.wiggleTime) * upgradeMenu.config.iconWiggle.maxRotation * 
                            (upgradeMenu.hoverIndex == i and 1 or 0)
             end
+            
             if upgradeMenu.hoverIndex == i then
-                love.graphics.setColor(upgradeMenu.shadowColor)
+                utils.drawWithShadow(
+                    upgrade.image,
+                    iconX + shiftX + iconCenterX,
+                    iconY + shiftY + iconCenterY,
+                    rotation,
+                    1, 1,
+                    iconCenterX, iconCenterY,
+                    upgradeMenu.config.iconShadow.x,
+                    upgradeMenu.shadowColor
+                )
+            else
+                love.graphics.setColor(1, 1, 1)
                 love.graphics.draw(
                     upgrade.image,
-                    iconX + shiftX + iconCenterX + upgradeMenu.config.iconShadow.x,
-                    iconY + shiftY + iconCenterY + upgradeMenu.config.iconShadow.y,
+                    iconX + shiftX + iconCenterX,
+                    iconY + shiftY + iconCenterY,
                     rotation,
                     1, 1,
                     iconCenterX, iconCenterY
                 )
             end
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.draw(
-                upgrade.image,
-                iconX + shiftX + iconCenterX,
-                iconY + shiftY + iconCenterY,
-                rotation,
-                1, 1,
-                iconCenterX, iconCenterY
-            )
             
             local shiftX = animState and animState.actualX or 0
             local shiftY = animState and animState.actualY or 0
@@ -276,6 +284,8 @@ function upgradeMenu.draw()
             local descShadowOffset = (upgradeMenu.hoverIndex == i) and upgradeMenu.config.textShift.descShadow or 0
             
             love.graphics.setFont(assets.fonts.fat)
+            
+            -- Draw title with shadow
             love.graphics.setColor(upgradeMenu.shadowColor)
             love.graphics.print(upgrade.name, popupX + upgradeMenu.config.textXOffset + shiftX + titleShadowOffset,
                                                upgradeY + shiftY + titleShadowOffset)
@@ -284,6 +294,8 @@ function upgradeMenu.draw()
                                                upgradeY + shiftY)
             
             love.graphics.setFont(assets.fonts.m5x7)
+            
+            -- Draw description with shadow
             love.graphics.setColor(upgradeMenu.shadowColor)
             love.graphics.print(upgrade.description, popupX + upgradeMenu.config.textXOffset + shiftX + descShadowOffset,
                                               upgradeY + upgradeMenu.config.descriptionYOffset + shiftY + descShadowOffset)
