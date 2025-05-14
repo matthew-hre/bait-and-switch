@@ -162,17 +162,17 @@ function player.takeDamage()
         player.createDeathParticles()
         player.dead = true
         
-        local net = require("net")
+        local net = require("src.net")
         net.visible = false
         
         ui.startSlideOut()
         
-        local projectile = require("projectile")
+        local projectile = require("src.projectile")
         projectile.clearAllBounces()
         
-        local deathScreen = require("deathScreen")
+        local deathScreen = require("src.deathScreen")
         
-        local enemy = require("enemy")
+        local enemy = require("src.enemy")
         for _, e in ipairs(enemy.active) do
             if not e.caught and not e.dead then
                 enemy.kill(e)
