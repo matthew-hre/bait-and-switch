@@ -12,6 +12,7 @@ local tutorial = require("tutorial")
 local gameState = require("gameState")
 local upgradeMenu = require("upgradeMenu")
 local deathScreen = require("deathScreen")
+local pauseMenu = require("pauseMenu")
 
 local ui = require("ui")
 
@@ -32,6 +33,7 @@ function love.load()
     particle.load()
     ui.load()
     upgradeMenu.load()
+    pauseMenu.load()
     tutorial.load()
 end
 
@@ -48,7 +50,11 @@ function love.update(dt)
     end
     
     if gameState.paused then
-        upgradeMenu.update(dt)
+        if gameState.pausedForUpgrade then
+            upgradeMenu.update(dt)
+        elseif gameState.pausedForPause then
+            pauseMenu.update(dt)
+        end
         return
     end
     
@@ -87,9 +93,23 @@ function love.mousepressed(x, y, button)
         if upgradeMenu.mousepressed(x, y, button) then
             return
         end
+    elseif gameState.pausedForPause then
+        if pauseMenu.mousepressed(x, y, button) then
+            return
+        end
     end
     
     net.mousepressed(x, y, button)
+end
+
+function love.keypressed(key)
+    if key == "escape" then
+        if not gameState.deathScreen.active and 
+           not gameState.deathScreen.showDeathScreen and
+           not gameState.pausedForUpgrade then
+            pauseMenu.toggle()
+        end
+    end
 end
 
 function love.draw()
@@ -118,6 +138,7 @@ function love.draw()
     
     if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
         upgradeMenu.draw()
+        pauseMenu.draw()
     end
 
     if gameState.deathScreen.active then

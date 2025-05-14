@@ -7,7 +7,7 @@
 - [ ] sound effects
 - [x] tutorial
 - [ ] main menu
-- [ ] pause menu
+- [x] pause menu
 - [ ] settings menu
   - [ ] volume
   - [ ] controls

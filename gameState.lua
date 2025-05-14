@@ -8,6 +8,7 @@ local gameState = {
     },
     paused = false,
     pausedForUpgrade = false,
+    pausedForPause = false,
     tutorialMode = true,
     
     deathScreen = {
