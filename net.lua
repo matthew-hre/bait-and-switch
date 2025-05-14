@@ -3,6 +3,7 @@ local net = {}
 local config = require("config")
 local assets = require("assets")
 local playerRef = require("player")
+local input = require("src.input")
 
 local projectile = require("projectile")
 local gameState = require("gameState")
@@ -42,20 +43,16 @@ function net.load()
     net.swingingOut = false
 
     net.swingHoldTimer = 0
-    
-    net.netButton = config.controls.action.net
-    
+        
     net.visible = true
 end
 
 function net.update(dt)
-    local mx, my = love.mouse.getPosition()
-    mx = mx / net.mouseScale
-    my = my / net.mouseScale
+    local mx, my = input.getMousePosition()
     local angleToMouse = math.atan2(my - net.player.y, mx - net.player.x) + math.pi / 2
 
     local positioningAngle
-    if config.settings.netPosition == "right" then
+    if gameState.settings.netPosition == "right" then
         positioningAngle = angleToMouse
     else
         -- default to left side
@@ -79,9 +76,7 @@ function net.update(dt)
                 net.swingingOut = false
                 net.swingHoldTimer = 0
                 
-                local mx, my = love.mouse.getPosition()
-                mx = mx / net.mouseScale
-                my = my / net.mouseScale
+                local mx, my = input.getMousePosition()
                 
                 if net.loaded then
                     local netTipX = net.x + math.sin(net.angle) * net.sprite:getHeight()
@@ -109,7 +104,7 @@ function net.update(dt)
 end
 
 function net.mousepressed(x, y, button)
-    if button == net.netButton and not net.swinging then
+    if button == input.actions.net and not net.swinging then
         net.swinging = true
         net.swingingOut = true
     end

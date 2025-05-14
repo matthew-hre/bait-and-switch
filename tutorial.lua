@@ -5,6 +5,7 @@ local player = require("player")
 local enemy = require("enemy")
 local gameState = require("gameState")
 local config = require("config")
+local input = require("src.input")
 
 tutorial.config = {
     walkIconOffset = -32,
@@ -62,14 +63,10 @@ function tutorial.createTutorialBug(x, y)
 end
 
 function tutorial.checkMovement()
-    for _, direction in ipairs({"up", "down", "left", "right"}) do
-        for _, key in ipairs(player.controls[direction]) do
-            if love.keyboard.isDown(key) then
-                return true
-            end
-        end
-    end
-    return false
+    return input.isMovementDown("up") or 
+           input.isMovementDown("down") or 
+           input.isMovementDown("left") or 
+           input.isMovementDown("right")
 end
 
 function tutorial.updateElement(element, dt, condition)
@@ -120,7 +117,7 @@ function tutorial.update(dt)
     end
     
     tutorial.updateElement(tutorial.elements.walk, dt, tutorial.checkMovement())
-    tutorial.updateElement(tutorial.elements.click, dt, love.mouse.isDown(1))
+    tutorial.updateElement(tutorial.elements.click, dt, input.isActionDown("net"))
     
     if tutorial.tutorialBug and tutorial.tutorialBug.caught then
         tutorial.active = false

@@ -4,6 +4,7 @@ local config = require("config")
 local assets = require("assets")
 local gameState = require("gameState")
 local particle = require("particle")
+local input = require("src.input")
 
 player.config = {
     startX = 128,
@@ -56,28 +57,7 @@ end
 function player.update(dt)
     if player.dead then return end
     
-    local dx, dy = 0, 0
-    
-    for _, key in ipairs(player.controls.up) do
-        if love.keyboard.isDown(key) then dy = dy - 1 end
-    end
-    
-    for _, key in ipairs(player.controls.down) do
-        if love.keyboard.isDown(key) then dy = dy + 1 end
-    end
-    
-    for _, key in ipairs(player.controls.left) do
-        if love.keyboard.isDown(key) then dx = dx - 1 end
-    end
-    
-    for _, key in ipairs(player.controls.right) do
-        if love.keyboard.isDown(key) then dx = dx + 1 end
-    end
-
-    local len = math.sqrt(dx * dx + dy * dy)
-    if len > 0 then
-        dx, dy = dx / len, dy / len
-    end
+    local dx, dy = input.getMovementVector()
 
     player.x = math.max(
         0, 

@@ -4,6 +4,7 @@ local config = require("config")
 local assets = require("assets")
 local gameState = require("gameState")
 local utils = require("utils")
+local input = require("src.input")
 
 pauseMenu.config = {
     slideSpeed = 15,
@@ -105,9 +106,7 @@ function pauseMenu.update(dt)
     end
     
     if not pauseMenu.isAnimating and not pauseMenu.isExiting then
-        local mx, my = love.mouse.getPosition()
-        local scaledX = mx / config.screen.scale
-        local scaledY = my / config.screen.scale
+        local scaledX, scaledY = input.getMousePosition()
         
         local popupX = (config.screen.width - pauseMenu.width) / 2
         local popupY = pauseMenu.y

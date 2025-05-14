@@ -4,6 +4,7 @@ local config = require("config")
 local assets = require("assets")
 local gameState = require("gameState")
 local utils = require("utils")
+local input = require("src.input")
 
 upgradeMenu.config = {
     slideSpeed = 5,
@@ -175,9 +176,7 @@ function upgradeMenu.update(dt)
     end
     
     if not upgradeMenu.isAnimating and not upgradeMenu.isExiting then
-        local mx, my = love.mouse.getPosition()
-        local scaledX = mx / config.screen.scale
-        local scaledY = my / config.screen.scale
+        local scaledX, scaledY = input.getMousePosition()
         
         local popupX = (config.screen.width - upgradeMenu.width) / 2
         local popupY = upgradeMenu.y
@@ -301,12 +300,6 @@ function upgradeMenu.mousepressed(x, y, button)
     if not upgradeMenu.visible or upgradeMenu.isAnimating or upgradeMenu.isExiting then 
         return false
     end
-    
-    local scaledX = x / config.screen.scale
-    local scaledY = y / config.screen.scale
-    
-    local popupX = (config.screen.width - upgradeMenu.width) / 2
-    local popupY = upgradeMenu.y
     
     if upgradeMenu.hoverIndex then
         local upgrade = upgradeMenu.randomUpgrades[upgradeMenu.hoverIndex]

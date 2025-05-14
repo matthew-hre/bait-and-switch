@@ -11,6 +11,10 @@ local gameState = {
     pausedForPause = false,
     tutorialMode = true,
     
+    settings = {
+        netPosition = "left", -- Moved from config.lua for runtime mutability
+    },
+    
     deathScreen = {
         active = false,
         showDeathScreen = false,

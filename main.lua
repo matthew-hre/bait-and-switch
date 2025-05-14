@@ -15,6 +15,7 @@ local deathScreen = require("deathScreen")
 local pauseMenu = require("pauseMenu")
 
 local ui = require("ui")
+local input = require("src.input")
 
 function love.load()
     love.window.setMode(config.window.width, config.window.height, { resizable = false })
@@ -26,6 +27,7 @@ function love.load()
     canvas = love.graphics.newCanvas(config.screen.width, config.screen.height)
 
     assets.load()
+    input.load()
     player.load()
     enemy.load()
     net.load()
@@ -38,6 +40,8 @@ function love.load()
 end
 
 function love.update(dt)
+    input.update()
+    
     particle.update(dt)
     
     ui.update(dt)
@@ -82,9 +86,19 @@ function love.update(dt)
     end
     
     ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
+    
+    if input.isActionPressed("pause") then
+        if not gameState.deathScreen.active and 
+           not gameState.deathScreen.showDeathScreen and
+           not gameState.pausedForUpgrade then
+            pauseMenu.toggle()
+        end
+    end
 end
 
 function love.mousepressed(x, y, button)
+    input.mousepressed(x, y, button)
+    
     if gameState.deathScreen.active or gameState.deathScreen.showDeathScreen then
         return
     end
@@ -102,14 +116,16 @@ function love.mousepressed(x, y, button)
     net.mousepressed(x, y, button)
 end
 
+function love.mousereleased(x, y, button)
+    input.mousereleased(x, y, button)
+end
+
 function love.keypressed(key)
-    if key == "escape" then
-        if not gameState.deathScreen.active and 
-           not gameState.deathScreen.showDeathScreen and
-           not gameState.pausedForUpgrade then
-            pauseMenu.toggle()
-        end
-    end
+    input.keypressed(key)
+end
+
+function love.keyreleased(key)
+    input.keyreleased(key)
 end
 
 function love.draw()
@@ -155,10 +171,7 @@ function love.draw()
 end
 
 function drawCursor()
-    local mx, my = love.mouse.getPosition()
-    mx = math.floor(mx / config.screen.scale)
-    my = math.floor(my / config.screen.scale)
-
+    local mx, my = input.getMousePosition()
     local ox = assets.cursor:getWidth() / 2
     local oy = assets.cursor:getHeight() / 2
     local rot = love.timer.getTime() * 2
