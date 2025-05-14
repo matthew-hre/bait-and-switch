@@ -5,8 +5,7 @@
 - [ ] make this readme better
 - [x] death screen w/ round number
 - [ ] sound effects
-- [ ] screenshake?
-- [ ] tutorial
+- [x] tutorial
 - [ ] main menu
 - [ ] pause menu
 - [ ] settings menu
@@ -24,3 +23,7 @@
 - [ ] worm
 - [ ] fly
 - [ ] spider
+
+## not happening
+
+- screenshake: tried this, felt bad

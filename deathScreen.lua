@@ -43,6 +43,7 @@ function deathScreen.resetGame()
     gameState.stats.currentWave = 1
     gameState.paused = false
     gameState.pausedForUpgrade = false
+    gameState.tutorialMode = true
     
     gameState.killsPerWave = 13
     
@@ -57,11 +58,13 @@ function deathScreen.resetGame()
     local projectile = require("projectile")
     local net = require("net")
     local ui = require("ui")
+    local tutorial = require("tutorial")
     
     enemy.active = {}
     projectile.active = {}
     
     player.load()
+    tutorial.load()
     
     net.visible = true
     net.loaded = false

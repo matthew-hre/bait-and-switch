@@ -67,6 +67,10 @@ function projectile.clearAllBounces()
 end
 
 function projectile.update(dt)
+    if gameState.paused then
+        return
+    end
+    
     for i = #projectile.active, 1, -1 do
         local p = projectile.active[i]
         

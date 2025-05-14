@@ -2,6 +2,7 @@ local particle = {}
 
 local assets = require("assets")
 local config = require("config")
+local gameState = require("gameState")
 
 particle.config = {
     defaultScale = 0.5,
@@ -39,6 +40,10 @@ function particle.create(x, y, sprite, options)
 end
 
 function particle.update(dt)
+    if gameState.paused then
+        return
+    end
+    
     for i = #particle.active, 1, -1 do
         local p = particle.active[i]
         

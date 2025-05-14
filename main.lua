@@ -7,6 +7,7 @@ local net = require("net")
 local enemy = require("enemy")
 local projectile = require("projectile")
 local particle = require("particle")
+local tutorial = require("tutorial")
 
 local gameState = require("gameState")
 local upgradeMenu = require("upgradeMenu")
@@ -31,6 +32,7 @@ function love.load()
     particle.load()
     ui.load()
     upgradeMenu.load()
+    tutorial.load()
 end
 
 function love.update(dt)
@@ -52,7 +54,26 @@ function love.update(dt)
     
     player.update(dt)
     net.update(dt)
-    enemy.update(dt)
+    
+    -- Update tutorial logic before enemy update
+    tutorial.update(dt)
+    
+    -- Only update enemy system if tutorial mode is complete
+    if not gameState.tutorialMode then
+        enemy.update(dt)
+    else
+        -- Just update existing enemies (e.g. tutorial bug's rotation) but don't spawn new ones
+        for i = #enemy.active, 1, -1 do
+            local e = enemy.active[i]
+            
+            if e.dead then
+                table.remove(enemy.active, i)
+            elseif not e.caught and not e.isTutorialBug then
+                -- Process regular bug movement
+                -- No need to update the tutorial bug as it's handled in tutorial.update
+            end
+        end
+    end
     
     ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
 end
@@ -89,6 +110,9 @@ function love.draw()
     projectile.draw()
 
     particle.draw()
+    
+    -- Draw tutorial elements
+    tutorial.draw()
 
     ui.draw()
     

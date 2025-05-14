@@ -177,22 +177,25 @@ function enemy.checkRotatedRectangleCollision(e, playerX, playerY, playerRadius)
 end
 
 function enemy.update(dt)
-    enemy.spawnTimer = enemy.spawnTimer + dt
-    
-    if enemy.spawnTimer >= enemy.spawnInterval then
-        enemy.spawnTimer = 0
-        enemy.spawnInterval = math.random() * 
-            (enemy.config.maxSpawnInterval - enemy.config.minSpawnInterval) + 
-            enemy.config.minSpawnInterval
+    -- Only handle automatic enemy spawning if not in tutorial mode
+    if not gameState.tutorialMode then
+        enemy.spawnTimer = enemy.spawnTimer + dt
         
-        local waveBonus = math.min(10, gameState.stats.currentWave - 1)
-        local minSpawnCount = enemy.config.baseMinSpawnCount + waveBonus
-        local maxSpawnCount = enemy.config.baseMaxSpawnCount + waveBonus
-        
-        local spawnCount = math.random(minSpawnCount, maxSpawnCount)
-        
-        for i = 1, spawnCount do
-            enemy.createEnemy()
+        if enemy.spawnTimer >= enemy.spawnInterval then
+            enemy.spawnTimer = 0
+            enemy.spawnInterval = math.random() * 
+                (enemy.config.maxSpawnInterval - enemy.config.minSpawnInterval) + 
+                enemy.config.minSpawnInterval
+            
+            local waveBonus = math.min(10, gameState.stats.currentWave - 1)
+            local minSpawnCount = enemy.config.baseMinSpawnCount + waveBonus
+            local maxSpawnCount = enemy.config.baseMaxSpawnCount + waveBonus
+            
+            local spawnCount = math.random(minSpawnCount, maxSpawnCount)
+            
+            for i = 1, spawnCount do
+                enemy.createEnemy()
+            end
         end
     end
     
@@ -202,42 +205,59 @@ function enemy.update(dt)
         if e.dead then
             table.remove(enemy.active, i)
         elseif not e.caught then
-            local dx = player.x - e.x
-            local dy = player.y - e.y
-            
-            local len = math.sqrt(dx * dx + dy * dy)
-            
-            local playerRadius = player.getCollisionRadius()
-            
-            -- quick check for collision optimization
-            if len < (15 + playerRadius) then
-                if enemy.checkRotatedRectangleCollision(e, player.x, player.y, playerRadius) 
-                   and not player.isInvincible then
-                    player.takeDamage()
+            -- Skip movement update for tutorial bug (it's handled in tutorial.update)
+            if e.isTutorialBug then
+                -- Just handle collision detection for tutorial bug
+                local playerRadius = player.getCollisionRadius()
+                local dx = player.x - e.x
+                local dy = player.y - e.y
+                local len = math.sqrt(dx * dx + dy * dy)
+                
+                if len < (15 + playerRadius) then
+                    if enemy.checkRotatedRectangleCollision(e, player.x, player.y, playerRadius) 
+                       and not player.isInvincible then
+                        player.takeDamage()
+                    end
                 end
+            else
+                -- Regular enemy movement and collision logic
+                local dx = player.x - e.x
+                local dy = player.y - e.y
+                
+                local len = math.sqrt(dx * dx + dy * dy)
+                
+                local playerRadius = player.getCollisionRadius()
+                
+                -- quick check for collision optimization
+                if len < (15 + playerRadius) then
+                    if enemy.checkRotatedRectangleCollision(e, player.x, player.y, playerRadius) 
+                       and not player.isInvincible then
+                        player.takeDamage()
+                    end
+                end
+                
+                if len > 0 then
+                    dx, dy = dx / len, dy / len
+                end
+                
+                local separationX, separationY = enemy.calculateSeparation(e)
+                
+                local moveX = dx * (1 - enemy.config.separationStrength) + 
+                              separationX * enemy.config.separationStrength
+                local moveY = dy * (1 - enemy.config.separationStrength) + 
+                              separationY * enemy.config.separationStrength
+                
+                local moveLen = math.sqrt(moveX * moveX + moveY * moveY)
+                if moveLen > 0 then
+                    moveX = moveX / moveLen
+                    moveY = moveY / moveLen
+                end
+                
+                e.x = e.x + moveX * e.speed * dt
+                e.y = e.y + moveY * e.speed * dt
+                
+                e.angle = e.angle + enemy.config.spinSpeed * dt
             end
-            
-            if len > 0 then
-                dx, dy = dx / len, dy / len
-            end
-            
-            local separationX, separationY = enemy.calculateSeparation(e)
-            
-            local moveX = dx * (1 - enemy.config.separationStrength) + 
-                          separationX * enemy.config.separationStrength
-            local moveY = dy * (1 - enemy.config.separationStrength) + 
-                          separationY * enemy.config.separationStrength
-            
-            local moveLen = math.sqrt(moveX * moveX + moveY * moveY)
-            if moveLen > 0 then
-                moveX = moveX / moveLen
-                moveY = moveY / moveLen
-            end
-            
-            e.x = e.x + moveX * e.speed * dt
-            e.y = e.y + moveY * e.speed * dt
-            
-            e.angle = e.angle + enemy.config.spinSpeed * dt
         end
     end
 end
