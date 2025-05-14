@@ -3,7 +3,7 @@
 ## todo
 
 - [ ] make this readme better
-- [ ] death screen w/ round number
+- [x] death screen w/ round number
 - [ ] sound effects
 - [ ] screenshake?
 - [ ] tutorial
@@ -14,6 +14,9 @@
   - [ ] controls
   - [ ] resolution
   - [ ] graphics / particles
+- [ ] persistent data
+  - [ ] high score
+  - [ ] settings
 
 ## roadmap
 
