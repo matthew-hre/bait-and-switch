@@ -18,6 +18,7 @@
           love
           stylua
         ];
+        SDL_VIDEODRIVER = "";
       };
     });
   };
