@@ -48,8 +48,29 @@ function assets.load()
     assets.fonts.m5x7 = love.graphics.newFont("assets/fonts/m5x7.ttf", 16)
     assets.fonts.m5x7:setFilter("nearest", "nearest")
     
+    assets.audio = {}
+    assets.audio.netSwing = love.audio.newSource("assets/audio/netSwing.wav", "static")
+    assets.audio.bugCatch = love.audio.newSource("assets/audio/bugCatch.wav", "static")
+    assets.audio.projectileFire = love.audio.newSource("assets/audio/projectileFire.wav", "static")
+    assets.audio.enemyDeath = love.audio.newSource("assets/audio/enemyDeath.wav", "static")
+    assets.audio.playerHit = love.audio.newSource("assets/audio/playerHit.wav", "static")
+    assets.audio.bounce = love.audio.newSource("assets/audio/bounce.wav", "static")
+    assets.audio.uiHover = love.audio.newSource("assets/audio/uiHover.wav", "static")
+    assets.audio.uiClick = love.audio.newSource("assets/audio/uiClick.wav", "static")
+    assets.audio.upgradeSelect = love.audio.newSource("assets/audio/upgradeSelect.wav", "static")
+    assets.audio.waveComplete = love.audio.newSource("assets/audio/waveComplete.wav", "static")
+    assets.audio.gameOver = love.audio.newSource("assets/audio/gameOver.wav", "static")
+
     assets.primaryColor = {1, 0.6, 0.2, 1} -- Orange/fire color
     assets.shadowColor = config.visual.shadowColor
+end
+
+function assets.playSound(sound, pitchVariance)
+    local s = sound:clone()
+    if pitchVariance then
+        s:setPitch(1 + (math.random() * 2 - 1) * pitchVariance)
+    end
+    s:play()
 end
 
 return assets

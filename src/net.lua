@@ -83,6 +83,7 @@ function net.update(dt)
                     local netTipX = net.x + math.sin(net.angle) * net.sprite:getHeight()
                     local netTipY = net.y - math.cos(net.angle) * net.sprite:getHeight()
                     projectile.create(netTipX, netTipY, mx, my)
+                    assets.playSound(assets.audio.projectileFire, 0.1)
 
                     net.loaded = false
                 else
@@ -108,6 +109,7 @@ function net.mousepressed(x, y, button)
     if button == input.actions.net and not net.swinging then
         net.swinging = true
         net.swingingOut = true
+        assets.playSound(assets.audio.netSwing, 0.1)
     end
 end
 

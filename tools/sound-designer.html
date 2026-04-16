@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bait & Switch — Sound Designer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 2rem;
+    }
+    h1 {
+      color: #ff9933;
+      margin-bottom: 0.25rem;
+      font-size: 1.5rem;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+    }
+    .category {
+      margin-bottom: 2rem;
+    }
+    .category h2 {
+      color: #ff9933;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid #333;
+      padding-bottom: 0.25rem;
+    }
+    .sound-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #222;
+    }
+    .sound-name {
+      width: 160px;
+      font-weight: bold;
+      color: #ccc;
+      font-size: 0.85rem;
+    }
+    .sound-desc {
+      flex: 1;
+      color: #777;
+      font-size: 0.75rem;
+    }
+    button {
+      font-family: 'Courier New', monospace;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid #444;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+    .play-btn {
+      background: #2a4a2a;
+      color: #6f6;
+    }
+    .play-btn:hover { background: #3a6a3a; }
+    .play-btn:active { background: #4a8a4a; }
+    .download-btn {
+      background: #2a2a4a;
+      color: #99f;
+    }
+    .download-btn:hover { background: #3a3a6a; }
+    .download-all {
+      background: #4a3a1a;
+      color: #ff9933;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .download-all:hover { background: #6a5a2a; }
+  </style>
+</head>
+<body>
+  <h1>🎣 Bait & Switch — Sound Designer</h1>
+  <p class="subtitle">Click play to preview. Click download to export as .wav for LÖVE2D.</p>
+
+  <div id="app"></div>
+
+  <script>
+// ─── Audio Helpers ───────────────────────────────────────────────
+
+const SAMPLE_RATE = 44100;
+
+function createNoise(ctx, duration) {
+  const bufferSize = ctx.sampleRate * duration;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  return source;
+}
+
+// ─── Sound Definitions ──────────────────────────────────────────
+
+const sounds = {
+  // === GAMEPLAY ===
+  netSwing: {
+    name: "Net Swing",
+    desc: "Short, airy swoosh when swinging the net",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      // Tighter filtered noise — more of a swift flick than a broad whoosh
+      const noise = createNoise(ctx, 0.12);
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(1200, now);
+      filter.frequency.exponentialRampToValueAtTime(3000, now + 0.03);
+      filter.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+      filter.Q.value = 3;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.35, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(dest);
+      noise.start(now);
+      noise.stop(now + 0.12);
+
+      // Subtle tonal layer — gives it character beyond pure noise
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(500, now);
+      osc.frequency.exponentialRampToValueAtTime(250, now + 0.08);
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0.1, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+      osc.connect(oscGain);
+      oscGain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    },
+    duration: 0.15,
+  },
+
+  bugCatch: {
+    name: "Bug Catch",
+    desc: "Soft, round pop when catching a bug",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      // Lower, rounder pitch-down pop
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.14);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.45, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+
+      // Softer click transient — sine instead of square, lower freq
+      const click = ctx.createOscillator();
+      click.type = "sine";
+      click.frequency.value = 700;
+      const clickGain = ctx.createGain();
+      clickGain.gain.setValueAtTime(0.2, now);
+      clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.025);
+
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.16);
+
+      click.connect(clickGain);
+      clickGain.connect(dest);
+      click.start(now);
+      click.stop(now + 0.03);
+    },
+    duration: 0.2,
+  },
+
+  projectileFire: {
+    name: "Projectile Fire",
+    desc: "Launching a caught bug as a projectile",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      // Rising pitch with some grit
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.06);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.15);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2000, now);
+      filter.frequency.exponentialRampToValueAtTime(500, now + 0.15);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.18);
+    },
+    duration: 0.2,
+  },
+
+  enemyDeath: {
+    name: "Enemy Death",
+    desc: "Smooth, soft puff — plays well when rapid-fired",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      // Gentle pitch-down tone — the main body
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(360, now);
+      osc.frequency.exponentialRampToValueAtTime(120, now + 0.1);
+
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0.3, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+      osc.connect(oscGain);
+      oscGain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.12);
+
+      // Very light noise puff — not crunchy, just airy
+      const noise = createNoise(ctx, 0.08);
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(1200, now);
+      filter.frequency.exponentialRampToValueAtTime(300, now + 0.07);
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.12, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(dest);
+      noise.start(now);
+      noise.stop(now + 0.08);
+    },
+    duration: 0.15,
+  },
+
+  playerHit: {
+    name: "Player Hit",
+    desc: "Ouch — player takes damage",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      // Harsh buzz
+      const osc = ctx.createOscillator();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.45, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+      // Distortion-ish filter
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.value = 800;
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.28);
+    },
+    duration: 0.3,
+  },
+
+  bounce: {
+    name: "Bounce",
+    desc: "Projectile bouncing off a wall",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    },
+    duration: 0.12,
+  },
+
+  // === UI ===
+  uiHover: {
+    name: "UI Hover",
+    desc: "Subtle tick when hovering a button",
+    category: "UI",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = 1800;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    },
+    duration: 0.05,
+  },
+
+  uiClick: {
+    name: "UI Click",
+    desc: "Crisp click for selecting menu items",
+    category: "UI",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(1400, now);
+      osc.frequency.exponentialRampToValueAtTime(800, now + 0.06);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    },
+    duration: 0.1,
+  },
+
+  upgradeSelect: {
+    name: "Upgrade Select",
+    desc: "Three-note ascending chime — rewarding",
+    category: "UI",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+
+      // Three-note ascending chime (C5 → E5 → G5)
+      const notes = [523, 659, 784];
+      notes.forEach((freq, i) => {
+        const offset = i * 0.09;
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now + offset);
+        gain.gain.linearRampToValueAtTime(0.25, now + offset + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.22);
+
+        osc.connect(gain);
+        gain.connect(dest);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.25);
+      });
+    },
+    duration: 0.45,
+  },
+
+  // === EVENTS ===
+  waveComplete: {
+    name: "Wave Complete",
+    desc: "Warm ascending arpeggio — wave cleared",
+    category: "Events",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+      // C5 → E5 → G5 → C6, with sine for warmth, spaced wider
+      const notes = [523, 659, 784, 1047];
+
+      notes.forEach((freq, i) => {
+        const offset = i * 0.1;
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        // Soft lowpass to round it off
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = freq * 2.5;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now + offset);
+        gain.gain.linearRampToValueAtTime(0.2, now + offset + 0.02);
+        gain.gain.linearRampToValueAtTime(0.15, now + offset + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.35);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(dest);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.4);
+      });
+    },
+    duration: 0.75,
+  },
+
+  gameOver: {
+    name: "Game Over",
+    desc: "Slow, melancholic descent — you died",
+    category: "Events",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+      // Minor-tinged descending notes, slower pacing
+      const notes = [392, 349, 294, 262, 220]; // G4 → F4 → D4 → C4 → A3
+
+      notes.forEach((freq, i) => {
+        const offset = i * 0.28;
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        // Gentle lowpass
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = freq * 3;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now + offset);
+        gain.gain.linearRampToValueAtTime(0.22, now + offset + 0.04);
+        gain.gain.linearRampToValueAtTime(0.15, now + offset + 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.35);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(dest);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.4);
+      });
+    },
+    duration: 1.6,
+  },
+};
+
+// ─── Playback ────────────────────────────────────────────────────
+
+function playSound(key) {
+  const ctx = new AudioContext();
+  sounds[key].generate(ctx, ctx.destination);
+}
+
+// ─── WAV Export ──────────────────────────────────────────────────
+
+async function renderToBuffer(key) {
+  const sound = sounds[key];
+  const sampleRate = SAMPLE_RATE;
+  const length = sampleRate * sound.duration;
+  const offline = new OfflineAudioContext(1, length, sampleRate);
+  sound.generate(offline, offline.destination);
+  return await offline.startRendering();
+}
+
+function audioBufferToWav(buffer) {
+  const numChannels = 1;
+  const sampleRate = buffer.sampleRate;
+  const format = 1; // PCM
+  const bitDepth = 16;
+  const data = buffer.getChannelData(0);
+  const byteRate = sampleRate * numChannels * (bitDepth / 8);
+  const blockAlign = numChannels * (bitDepth / 8);
+  const dataSize = data.length * (bitDepth / 8);
+  const headerSize = 44;
+  const arrayBuffer = new ArrayBuffer(headerSize + dataSize);
+  const view = new DataView(arrayBuffer);
+
+  function writeString(offset, str) {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  }
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, format, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitDepth, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  for (let i = 0; i < data.length; i++) {
+    const sample = Math.max(-1, Math.min(1, data[i]));
+    view.setInt16(44 + i * 2, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+  }
+
+  return new Blob([arrayBuffer], { type: 'audio/wav' });
+}
+
+async function downloadSound(key) {
+  const buffer = await renderToBuffer(key);
+  const wav = audioBufferToWav(buffer);
+  const url = URL.createObjectURL(wav);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${key}.wav`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadAll() {
+  for (const key of Object.keys(sounds)) {
+    await downloadSound(key);
+    // Small delay so browser doesn't block multiple downloads
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+// ─── Build UI ────────────────────────────────────────────────────
+
+const app = document.getElementById('app');
+const categories = {};
+
+for (const [key, sound] of Object.entries(sounds)) {
+  if (!categories[sound.category]) categories[sound.category] = [];
+  categories[sound.category].push({ key, ...sound });
+}
+
+for (const [cat, items] of Object.entries(categories)) {
+  const section = document.createElement('div');
+  section.className = 'category';
+  section.innerHTML = `<h2>${cat}</h2>`;
+
+  for (const item of items) {
+    const row = document.createElement('div');
+    row.className = 'sound-row';
+    row.innerHTML = `
+      <span class="sound-name">${item.name}</span>
+      <span class="sound-desc">${item.desc}</span>
+      <button class="play-btn" onclick="playSound('${item.key}')">▶ Play</button>
+      <button class="download-btn" onclick="downloadSound('${item.key}')">⬇ .wav</button>
+    `;
+    section.appendChild(row);
+  }
+
+  app.appendChild(section);
+}
+
+const allBtn = document.createElement('button');
+allBtn.className = 'download-all';
+allBtn.textContent = '⬇ Download All .wav Files';
+allBtn.onclick = downloadAll;
+app.appendChild(allBtn);
+  </script>
+</body>
+</html>

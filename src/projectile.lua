@@ -156,6 +156,7 @@ function projectile.update(dt)
         
         if bounced then
             p.angle = atan2(p.vy, p.vx)
+            assets.playSound(assets.audio.bounce, 0.1)
         end
         
         if p.x < -margin or p.x > projectile.screenWidth + margin or

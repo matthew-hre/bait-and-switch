@@ -66,10 +66,13 @@ function enemy.createEnemy()
     return e
 end
 
-function enemy.kill(e)
+function enemy.kill(e, silent)
     if e.dead or e.caught then return end
     
     e.dead = true
+    if not silent then
+        assets.playSound(assets.audio.enemyDeath, 0.15)
+    end
     
     gameState.stats.killCount = gameState.stats.killCount + 1
     gameState.stats.waveKills = gameState.stats.waveKills + 1
@@ -78,6 +81,9 @@ function enemy.kill(e)
         gameState.stats.waveKills = 0
         gameState.stats.currentWave = gameState.stats.currentWave + 1
         
+        if not silent then
+            assets.playSound(assets.audio.waveComplete)
+        end
         upgradeMenu.show()
     end
     

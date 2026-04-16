@@ -151,6 +151,7 @@ end
 function player.takeDamage()
     if player.isInvincible then return end
     
+    assets.playSound(assets.audio.playerHit)
     player.health = player.health - 1
     player.isInvincible = true
     player.invincibilityTimer = 0
@@ -160,6 +161,7 @@ function player.takeDamage()
     ui.setHealth(player.health)
     
     if player.health <= 0 then
+        assets.playSound(assets.audio.gameOver)
         player.createDeathParticles()
         player.dead = true
         
@@ -176,7 +178,7 @@ function player.takeDamage()
         local enemy = require("src.enemy")
         for _, e in ipairs(enemy.active) do
             if not e.caught and not e.dead then
-                enemy.kill(e)
+                enemy.kill(e, true)
             end
         end
         

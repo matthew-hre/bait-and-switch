@@ -111,6 +111,7 @@ function pauseMenu.update(dt)
         local popupX = (config.screen.width - pauseMenu.width) / 2
         local popupY = pauseMenu.y
         
+        local previousHovered = pauseMenu.hoveredButton
         pauseMenu.hoveredButton = nil
         
         for i, button in ipairs(pauseMenu.buttons) do
@@ -123,6 +124,10 @@ function pauseMenu.update(dt)
                 pauseMenu.hoveredButton = i
                 break
             end
+        end
+        
+        if pauseMenu.hoveredButton and pauseMenu.hoveredButton ~= previousHovered then
+            assets.playSound(assets.audio.uiHover)
         end
     end
 end
@@ -268,6 +273,7 @@ function pauseMenu.mousepressed(x, y, button)
     end
     
     if pauseMenu.hoveredButton then
+        assets.playSound(assets.audio.uiClick)
         local action = pauseMenu.buttons[pauseMenu.hoveredButton].action
         if action then
             action()

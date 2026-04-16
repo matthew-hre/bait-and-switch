@@ -89,6 +89,10 @@ function upgradeList.new(options)
             end
         end
         
+        if self.hoverIndex and self.hoverIndex ~= previousHoverIndex then
+            assets.playSound(assets.audio.uiHover)
+        end
+        
         for i = 1, #self.randomUpgrades do
             if self.textAnimationStates[i] then
                 local state = self.textAnimationStates[i]
@@ -184,6 +188,7 @@ function upgradeList.new(options)
     function instance:mousepressed(x, y, button)
         if self.hoverIndex then
             local upgrade = self.randomUpgrades[self.hoverIndex]
+            assets.playSound(assets.audio.upgradeSelect)
             
             if self.onSelect then
                 self.onSelect(upgrade)
