@@ -4,6 +4,7 @@ local config = require("src.config")
 local assets = require("src.assets")
 local gameState = require("src.gameState")
 local utils = require("src.utils")
+local save = require("src.save")
 
 deathScreen.config = {
     textRevealDelay = 1,
@@ -20,6 +21,7 @@ deathScreen.config = {
 function deathScreen.init()
     if gameState.stats.currentWave > gameState.deathScreen.bestWave then
         gameState.deathScreen.bestWave = gameState.stats.currentWave
+        save.write({ bestWave = gameState.deathScreen.bestWave })
     end
 
     gameState.deathScreen.timer = 0

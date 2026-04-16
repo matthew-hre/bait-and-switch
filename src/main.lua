@@ -17,6 +17,7 @@ local pauseMenu = require("src.pauseMenu")
 
 local ui = require("src.ui")
 local input = require("src.input")
+local save = require("src.save")
 
 function love.load()
     love.window.setMode(config.window.width, config.window.height, { resizable = false })
@@ -38,6 +39,11 @@ function love.load()
     upgradeMenu.load()
     pauseMenu.load()
     tutorial.load()
+
+    local data = save.read()
+    if data then
+        gameState.deathScreen.bestWave = data.bestWave or 1
+    end
 end
 
 function love.update(dt)
