@@ -50,7 +50,7 @@ function love.update(dt)
     
     if gameState.paused then
 
-        if input.isActionPressed("pause") then
+        if input.isActionPressed("pause") and not gameState.pausedForUpgrade then
             pauseMenu.toggle()
         end
 

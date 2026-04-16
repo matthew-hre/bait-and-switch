@@ -107,7 +107,8 @@ function player.draw()
     
     local angle = math.floor(player.angle * player.angleSnapFactor) / player.angleSnapFactor
 
-    utils.drawWithShadow(player.sprite, px, py, angle, 1, 1, ox, oy, player.shadowOffset, player.shadowColor)
+    local scale = player.scale or 1
+    utils.drawWithShadow(player.sprite, px, py, angle, scale, scale, ox, oy, player.shadowOffset, player.shadowColor)
 end
 
 function player.createDeathParticles()
@@ -187,7 +188,7 @@ end
 function player.getCollisionRadius()
     local width = player.sprite:getWidth()
     
-    return math.max(width) / player.config.collisionWiggleRoom
+    return (width / 2) / player.config.collisionWiggleRoom
 end
 
 return player
