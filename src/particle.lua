@@ -41,7 +41,7 @@ function particle.create(x, y, sprite, options)
 end
 
 function particle.update(dt)
-    if gameState.paused then
+    if gameState.paused and not gameState.deathScreen.showDeathScreen then
         return
     end
     

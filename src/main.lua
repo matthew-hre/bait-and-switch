@@ -50,6 +50,8 @@ function love.update(dt)
     input.update()
     
     if gameState.deathScreen.showDeathScreen then
+        particle.update(dt)
+        projectile.update(dt)
         deathScreen.update(dt)
         return
     end

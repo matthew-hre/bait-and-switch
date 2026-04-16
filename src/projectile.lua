@@ -68,7 +68,7 @@ function projectile.clearAllBounces()
 end
 
 function projectile.update(dt)
-    if gameState.paused then
+    if gameState.paused and not gameState.deathScreen.showDeathScreen then
         return
     end
     
