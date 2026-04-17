@@ -21,7 +21,7 @@ input.actions = {
 function input.load()
     input.movements = config.controls.movement
     input.actions.net = config.controls.action.net
-    input.screenScale = config.screen.scale
+    input.screenScale = love.graphics.getWidth() / config.screen.width
 end
 
 function input.update()    

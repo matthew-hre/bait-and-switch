@@ -185,7 +185,9 @@ function love.draw()
 
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(canvas, 0, 0, 0, config.screen.scale, config.screen.scale)
+    local scaleX = love.graphics.getWidth() / config.screen.width
+    local scaleY = love.graphics.getHeight() / config.screen.height
+    love.graphics.draw(canvas, 0, 0, 0, scaleX, scaleY)
 end
 
 function drawCursor()
