@@ -50,10 +50,9 @@ jobs:
         run: npx love.js /tmp/game.love web-build -t "Bait and Switch"
 
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod"
-          working-directory: ./web-build
+        run: |
+          npm i -g vercel@latest
+          cd web-build
+          vercel deploy --prod --yes \
+            --token ${{ secrets.VERCEL_TOKEN }} \
+            --cwd .
