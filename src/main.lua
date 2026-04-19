@@ -111,15 +111,16 @@ function love.update(dt)
     if not gameState.tutorialMode then
         enemy.update(dt)
     else
-        -- Just update existing enemies (e.g. tutorial bug's rotation) but don't spawn new ones
-        for i = #enemy.active, 1, -1 do
+        local n = #enemy.active
+        local i = 1
+        while i <= n do
             local e = enemy.active[i]
-            
             if e.dead then
-                table.remove(enemy.active, i)
-            elseif not e.caught and not e.isTutorialBug then
-                -- Process regular bug movement
-                -- No need to update the tutorial bug as it's handled in tutorial.update
+                enemy.active[i] = enemy.active[n]
+                enemy.active[n] = nil
+                n = n - 1
+            else
+                i = i + 1
             end
         end
     end

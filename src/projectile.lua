@@ -39,6 +39,11 @@ function projectile.load()
     projectile.screenHeight = config.screen.height
     projectile.shadowOffset = config.visual.shadowOffset
     
+    projectile.spriteWidth = projectile.sprite:getWidth()
+    projectile.spriteHeight = projectile.sprite:getHeight()
+    projectile.spriteOX = projectile.spriteWidth / 2
+    projectile.spriteOY = projectile.spriteHeight / 2
+    
     projectile.size = 1
 end
 
@@ -77,11 +82,11 @@ function projectile.update(dt)
     local atan2 = math.atan2
     local cos = math.cos
     local sin = math.sin
-    local ipairs = ipairs
-    local spriteWidth, spriteHeight = projectile.sprite:getWidth(), projectile.sprite:getHeight()
     local checkEnemyCollision = projectile.checkEnemyCollision
     
-    for i = #projectile.active, 1, -1 do
+    local n = #projectile.active
+    local i = 1
+    while i <= n do
         local p = projectile.active[i]
         
         p.x = p.x + p.vx * dt
@@ -161,7 +166,11 @@ function projectile.update(dt)
         
         if p.x < -margin or p.x > projectile.screenWidth + margin or
            p.y < -margin or p.y > projectile.screenHeight + margin then
-            table.remove(projectile.active, i)
+            projectile.active[i] = projectile.active[n]
+            projectile.active[n] = nil
+            n = n - 1
+        else
+            i = i + 1
         end
     end
 end
@@ -187,25 +196,18 @@ function projectile.checkEnemyCollision(proj)
 end
 
 function projectile.draw()
-    local ipairs = ipairs
     local floor = math.floor
     local sprite = projectile.sprite
-    local spriteWidth = sprite:getWidth()
-    local spriteHeight = sprite:getHeight()
+    local ox = projectile.spriteOX
+    local oy = projectile.spriteOY
     local shadowOffset = projectile.shadowOffset
     local shadowColor = projectile.shadowColor
     local pi = math.pi
+    local scale = projectile.size or 1
     
     for _, p in ipairs(projectile.active) do
-        local px = floor(p.x)
-        local py = floor(p.y)
-        local ox = spriteWidth / 2
-        local oy = spriteHeight / 2
-        
         local drawAngle = p.angle + pi/2
-        local scale = projectile.size or 1
-        
-        utils.drawWithShadow(sprite, px, py, drawAngle, scale, scale, ox, oy, shadowOffset, shadowColor)
+        utils.drawWithShadow(sprite, floor(p.x), floor(p.y), drawAngle, scale, scale, ox, oy, shadowOffset, shadowColor)
     end
 end
 

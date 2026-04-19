@@ -27,6 +27,8 @@ function particle.create(x, y, sprite, options)
     p.x = x
     p.y = y
     p.sprite = sprite
+    p.ox = sprite:getWidth() / 2
+    p.oy = sprite:getHeight() / 2
     p.scale = options.scale or particle.config.defaultScale
     p.scaleDecay = options.scaleDecay or particle.config.defaultScaleDecay
     p.angle = options.angle or 0
@@ -45,10 +47,9 @@ function particle.update(dt)
         return
     end
     
-    -- Pull frequently used functions into local variables
-    local ipairs = ipairs
-    
-    for i = #particle.active, 1, -1 do
+    local n = #particle.active
+    local i = 1
+    while i <= n do
         local p = particle.active[i]
         
         p.x = p.x + p.vx * dt
@@ -61,14 +62,16 @@ function particle.update(dt)
         p.scale = p.scale - p.scaleDecay * dt
         
         if p.scale <= 0 then
-            table.remove(particle.active, i)
+            particle.active[i] = particle.active[n]
+            particle.active[n] = nil
+            n = n - 1
+        else
+            i = i + 1
         end
     end
 end
 
 function particle.draw()
-    -- Pull frequently used functions into local variables
-    local ipairs = ipairs
     local floor = math.floor
     local shadowColor = particle.shadowColor
     
@@ -76,8 +79,8 @@ function particle.draw()
         local px = floor(p.x)
         local py = floor(p.y)
         local sprite = p.sprite
-        local ox = sprite:getWidth() / 2
-        local oy = sprite:getHeight() / 2
+        local ox = p.ox
+        local oy = p.oy
         local scale = p.scale
         local angle = p.angle
         local shadowOffset = p.shadowOffset * scale

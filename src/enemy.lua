@@ -48,6 +48,11 @@ function enemy.load()
     enemy.screenHeight = config.screen.height
     enemy.shadowOffset = config.visual.shadowOffset
     enemy.angleSnapFactor = config.visual.angleSnapFactor
+    
+    enemy.spriteWidth = enemy.sprite:getWidth()
+    enemy.spriteHeight = enemy.sprite:getHeight()
+    enemy.spriteOX = enemy.spriteWidth / 2
+    enemy.spriteOY = enemy.spriteHeight / 2
 end
 
 function enemy.createEnemy()
@@ -160,12 +165,8 @@ function enemy.checkRotatedRectangleCollision(e, playerX, playerY, playerRadius)
     local min = math.min
     local max = math.max
     
-    local enemySprite = enemy.sprite
-    local enemyWidth = enemySprite:getWidth()
-    local enemyHeight = enemySprite:getHeight()
-    
-    local halfWidth = enemyWidth / 2
-    local halfHeight = enemyHeight / 2
+    local halfWidth = enemy.spriteOX
+    local halfHeight = enemy.spriteOY
     
     local dx = playerX - e.x
     local dy = playerY - e.y
@@ -215,11 +216,15 @@ function enemy.update(dt)
         end
     end
     
-    for i = #enemy.active, 1, -1 do
+    local n = #enemy.active
+    local i = 1
+    while i <= n do
         local e = enemy.active[i]
         
         if e.dead then
-            table.remove(enemy.active, i)
+            enemy.active[i] = enemy.active[n]
+            enemy.active[n] = nil
+            n = n - 1
         elseif not e.caught then
             -- Skip movement update for tutorial bug (it's handled in tutorial.update)
             if e.isTutorialBug then
@@ -274,21 +279,26 @@ function enemy.update(dt)
                 
                 e.angle = e.angle + enemy.config.spinSpeed * dt
             end
+            i = i + 1
+        else
+            i = i + 1
         end
     end
 end
 
 function enemy.draw()
+    local floor = math.floor
+    local sprite = enemy.sprite
+    local ox = enemy.spriteOX
+    local oy = enemy.spriteOY
+    local snapFactor = enemy.angleSnapFactor
+    local shadowOffset = enemy.shadowOffset
+    local shadowColor = enemy.shadowColor
+    
     for _, e in ipairs(enemy.active) do
         if not e.caught and not e.dead then
-            local px = math.floor(e.x)
-            local py = math.floor(e.y)
-            local ox = enemy.sprite:getWidth() / 2
-            local oy = enemy.sprite:getHeight() / 2
-            
-            local angle = math.floor(e.angle * enemy.angleSnapFactor) / enemy.angleSnapFactor
-            
-            utils.drawWithShadow(enemy.sprite, px, py, angle, 1, 1, ox, oy, enemy.shadowOffset, enemy.shadowColor)
+            local angle = floor(e.angle * snapFactor) / snapFactor
+            utils.drawWithShadow(sprite, floor(e.x), floor(e.y), angle, 1, 1, ox, oy, shadowOffset, shadowColor)
         end
     end
 end

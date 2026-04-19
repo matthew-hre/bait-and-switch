@@ -61,10 +61,31 @@ function assets.load()
     assets.shadowColor = config.visual.shadowColor
 end
 
+assets.soundPoolSize = 8
+assets.soundPools = {}
+
+function assets.getSoundPool(sound)
+    if not assets.soundPools[sound] then
+        local pool = {}
+        for i = 1, assets.soundPoolSize do
+            pool[i] = sound:clone()
+        end
+        pool.index = 1
+        assets.soundPools[sound] = pool
+    end
+    return assets.soundPools[sound]
+end
+
 function assets.playSound(sound, pitchVariance)
-    local s = sound:clone()
+    local pool = assets.getSoundPool(sound)
+    local s = pool[pool.index]
+    pool.index = pool.index % assets.soundPoolSize + 1
+
+    s:stop()
     if pitchVariance then
         s:setPitch(1 + (math.random() * 2 - 1) * pitchVariance)
+    else
+        s:setPitch(1)
     end
     s:play()
 end
