@@ -1,4 +1,6 @@
 local gameState = {
+    current = "MAIN_MENU",
+
     killsPerWave = 13,
     waveScaleFactor = 1.4,
     stats = {
@@ -6,20 +8,13 @@ local gameState = {
         waveKills = 0,
         currentWave = 1
     },
-    paused = false,
-    pausedForUpgrade = false,
-    pausedForPause = false,
-    pausedForSettings = false,
-    inMainMenu = true,
     tutorialMode = true,
     
     settings = {
-        netPosition = "left", -- Moved from config.lua for runtime mutability
+        netPosition = "left",
     },
     
     deathScreen = {
-        active = false,
-        showDeathScreen = false,
         deathAnimationDelay = 0,
         deathAnimationTimer = 0,
         timer = 0,
@@ -30,5 +25,10 @@ local gameState = {
         bestWave = 1
     }
 }
+
+function gameState.isPaused()
+    local s = gameState.current
+    return s == "PAUSED_MENU" or s == "PAUSED_SETTINGS" or s == "PAUSED_UPGRADE"
+end
 
 return gameState

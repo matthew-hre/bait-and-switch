@@ -61,8 +61,7 @@ function pauseMenu.show()
     
     pauseMenu.targetY = (config.screen.height - pauseMenu.height) / 2
     
-    gameState.paused = true
-    gameState.pausedForPause = true
+    gameState.current = "PAUSED_MENU"
     
     pauseMenu.hoveredButton = nil
 end
@@ -76,13 +75,11 @@ end
 
 function pauseMenu.showSettings()
     local settingsMenu = require("src.settingsMenu")
-    -- Hide instantly (no animation) since we're transitioning to settings
     pauseMenu.visible = false
     pauseMenu.isAnimating = false
     pauseMenu.isExiting = false
     pauseMenu.y = pauseMenu.config.startY
-    gameState.pausedForPause = false
-    settingsMenu.show()
+    settingsMenu.show("PLAYING")
 end
 
 function pauseMenu.update(dt)
@@ -101,10 +98,7 @@ function pauseMenu.update(dt)
                 pauseMenu.isExiting = false
                 pauseMenu.y = pauseMenu.config.startY
                 
-                gameState.pausedForPause = false
-                if not gameState.pausedForSettings then
-                    gameState.paused = false
-                end
+                gameState.current = "PLAYING"
             end
         else
             if math.abs(pauseMenu.y - pauseMenu.targetY) < 1 then

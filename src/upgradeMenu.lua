@@ -79,8 +79,7 @@ function upgradeMenu.load()
             upgradeMenu.list:getRandomUpgrades()
         end,
         onHideComplete = function()
-            gameState.paused = false
-            gameState.pausedForUpgrade = false
+            gameState.current = "PLAYING"
         end,
         
         drawContent = function(popup, x, y)
@@ -94,8 +93,7 @@ function upgradeMenu.show()
     
     gameState.killsPerWave = math.ceil(gameState.killsPerWave * gameState.waveScaleFactor)
     
-    gameState.paused = true
-    gameState.pausedForUpgrade = true
+    gameState.current = "PAUSED_UPGRADE"
     
     upgradeMenu.popup:show()
 end

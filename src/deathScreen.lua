@@ -44,17 +44,15 @@ function deathScreen.resetGame()
     gameState.stats.killCount = 0
     gameState.stats.waveKills = 0
     gameState.stats.currentWave = 1
-    gameState.paused = false
-    gameState.pausedForUpgrade = false
     gameState.tutorialMode = true
     
     gameState.killsPerWave = 13
     
-    gameState.deathScreen.active = false
-    gameState.deathScreen.showDeathScreen = false
     gameState.deathScreen.deathAnimationTimer = 0
     
     gameState.deathScreen.bestWave = bestWave
+    
+    gameState.current = "PLAYING"
     
     local player = require("src.player")
     local enemy = require("src.enemy")
@@ -82,11 +80,11 @@ function deathScreen.resetGame()
 end
 
 function deathScreen.update(dt)
-    if gameState.deathScreen.showDeathScreen and not gameState.deathScreen.active then
+    if gameState.current == "DEATH_ANIMATING" then
         gameState.deathScreen.deathAnimationTimer = gameState.deathScreen.deathAnimationTimer + dt
         
         if gameState.deathScreen.deathAnimationTimer >= deathScreen.config.deathAnimationDelay then
-            gameState.deathScreen.active = true
+            gameState.current = "DEATH_SCREEN"
             deathScreen.init()
         end
         

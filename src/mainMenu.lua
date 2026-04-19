@@ -39,13 +39,12 @@ end
 function mainMenu.beginTransition()
     mainMenu.transitioning = true
     mainMenu.transitionAlpha = 0
+    gameState.current = "MENU_TO_PLAY"
 end
 
 function mainMenu.openSettings()
     local settingsMenu = require("src.settingsMenu")
-    gameState.pausedForSettings = true
-    gameState.paused = true
-    settingsMenu.show()
+    settingsMenu.show("MAIN_MENU")
 end
 
 function mainMenu.update(dt)
@@ -59,18 +58,7 @@ function mainMenu.update(dt)
             mainMenu.transitioning = false
             mainMenu.fadingOut = true
             mainMenu.fadeOutAlpha = 1
-            gameState.inMainMenu = false
-            gameState.paused = false
-        end
-        return
-    end
-
-    if gameState.pausedForSettings then
-        local settingsMenu = require("src.settingsMenu")
-        settingsMenu.update(dt)
-
-        if input.isActionPressed("pause") then
-            settingsMenu.hide()
+            gameState.current = "PLAYING"
         end
         return
     end
@@ -116,28 +104,26 @@ function mainMenu.draw()
         mainMenu.shadowColor
     )
 
-    if not gameState.pausedForSettings then
-        love.graphics.setFont(assets.fonts.fat)
-        for i, button in ipairs(mainMenu.buttons) do
-            local buttonY = mainMenu.config.buttonY + (i - 1) * mainMenu.config.buttonHeight
-            local isHovered = mainMenu.hoveredButton == i
+    love.graphics.setFont(assets.fonts.fat)
+    for i, button in ipairs(mainMenu.buttons) do
+        local buttonY = mainMenu.config.buttonY + (i - 1) * mainMenu.config.buttonHeight
+        local isHovered = mainMenu.hoveredButton == i
 
-            local textYOffset = isHovered and -mainMenu.config.buttonHoverOffset or 0
+        local textYOffset = isHovered and -mainMenu.config.buttonHoverOffset or 0
 
-            if isHovered then
-                love.graphics.setColor(mainMenu.shadowColor)
-                love.graphics.printf(button.text,
-                    mainMenu.config.buttonTextOffset,
-                    buttonY + mainMenu.config.buttonTextOffset + textYOffset,
-                    config.screen.width, "center")
-            end
-
-            love.graphics.setColor(1, 1, 1)
+        if isHovered then
+            love.graphics.setColor(mainMenu.shadowColor)
             love.graphics.printf(button.text,
-                0,
-                buttonY + textYOffset,
+                mainMenu.config.buttonTextOffset,
+                buttonY + mainMenu.config.buttonTextOffset + textYOffset,
                 config.screen.width, "center")
         end
+
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf(button.text,
+            0,
+            buttonY + textYOffset,
+            config.screen.width, "center")
     end
 
     if mainMenu.transitioning then
@@ -149,11 +135,6 @@ end
 function mainMenu.mousepressed(x, y, button)
     if not mainMenu.visible or mainMenu.transitioning then
         return false
-    end
-
-    if gameState.pausedForSettings then
-        local settingsMenu = require("src.settingsMenu")
-        return settingsMenu.mousepressed(x, y, button)
     end
 
     if mainMenu.hoveredButton then

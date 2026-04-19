@@ -34,14 +34,15 @@ function settingsMenu.load()
         netPosition = gameState.settings.netPosition or "left",
     }
 
+    settingsMenu.returnState = "MAIN_MENU"
+
     settingsMenu.popup = Popup.new({
         sprite = assets.ui.popup,
         shadowColor = assets.shadowColor,
         slideSpeed = 12,
         onHideComplete = function()
             settingsMenu.visible = false
-            gameState.pausedForSettings = false
-            gameState.paused = false
+            gameState.current = settingsMenu.returnState
         end,
         drawContent = function(popup, x, y)
             settingsMenu.drawContent(x, y)
@@ -72,12 +73,16 @@ function settingsMenu.load()
     settingsMenu.applySettings()
 end
 
-function settingsMenu.show()
+function settingsMenu.show(returnState)
     if settingsMenu.popup.visible then return end
 
+    settingsMenu.returnState = returnState or "MAIN_MENU"
     settingsMenu.visible = true
-    gameState.paused = true
-    gameState.pausedForSettings = true
+    if returnState == "MAIN_MENU" then
+        gameState.current = "MAIN_MENU_SETTINGS"
+    else
+        gameState.current = "PAUSED_SETTINGS"
+    end
     settingsMenu.popup:show()
 end
 
@@ -336,14 +341,6 @@ end
 function settingsMenu.draw()
     if not settingsMenu.visible then return end
     settingsMenu.popup:draw()
-end
-
-function settingsMenu.toggle()
-    if settingsMenu.visible then
-        settingsMenu.hide()
-    else
-        settingsMenu.show()
-    end
 end
 
 return settingsMenu

@@ -183,7 +183,7 @@ function player.takeDamage()
         end
         
         gameState.deathScreen.deathAnimationDelay = 1.5
-        gameState.deathScreen.showDeathScreen = true
+        gameState.current = "DEATH_ANIMATING"
     end
 end
 

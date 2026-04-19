@@ -50,43 +50,24 @@ function love.load()
     end
 end
 
-function love.update(dt)
-    input.update()
+local stateUpdate = {}
 
-    if gameState.inMainMenu then
-        mainMenu.update(dt)
-        input.clear()
-        return
+function stateUpdate.MAIN_MENU(dt)
+    mainMenu.update(dt)
+end
+
+function stateUpdate.MAIN_MENU_SETTINGS(dt)
+    settingsMenu.update(dt)
+    if input.isActionPressed("pause") then
+        settingsMenu.hide()
     end
-    
-    if gameState.deathScreen.showDeathScreen then
-        particle.update(dt)
-        projectile.update(dt)
-        deathScreen.update(dt)
-        return
-    end
-    
-    if gameState.paused then
+end
 
-        if input.isActionPressed("pause") and not gameState.pausedForUpgrade then
-            if gameState.pausedForSettings then
-                settingsMenu.hide()
-            else
-                pauseMenu.toggle()
-            end
-        end
+function stateUpdate.MENU_TO_PLAY(dt)
+    mainMenu.update(dt)
+end
 
-        if gameState.pausedForUpgrade then
-            upgradeMenu.update(dt)
-        elseif gameState.pausedForSettings then
-            settingsMenu.update(dt)
-        elseif gameState.pausedForPause then
-            pauseMenu.update(dt)
-        end
-        input.clear()
-        return
-    end
-
+function stateUpdate.PLAYING(dt)
     if mainMenu.fadingOut then
         mainMenu.fadeOutAlpha = mainMenu.fadeOutAlpha - dt * mainMenu.config.fadeOutSpeed
         if mainMenu.fadeOutAlpha <= 0 then
@@ -96,18 +77,12 @@ function love.update(dt)
     end
 
     particle.update(dt)
-    
     ui.update(dt)
-    
     projectile.update(dt)
-    
     player.update(dt)
     net.update(dt)
-    
-    -- Update tutorial logic before enemy update
     tutorial.update(dt)
-    
-    -- Only update enemy system if tutorial mode is complete
+
     if not gameState.tutorialMode then
         enemy.update(dt)
     else
@@ -124,48 +99,82 @@ function love.update(dt)
             end
         end
     end
-    
-    ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
-    
-    if input.isActionPressed("pause") then
-        print("Pause pressed")
-        if not gameState.deathScreen.active and 
-           not gameState.deathScreen.showDeathScreen and
-           not gameState.pausedForUpgrade then
-            pauseMenu.toggle()
-        end
-    end
 
+    ui.setProgress(gameState.stats.waveKills, gameState.killsPerWave)
+
+    if input.isActionPressed("pause") then
+        pauseMenu.toggle()
+    end
+end
+
+function stateUpdate.PAUSED_MENU(dt)
+    pauseMenu.update(dt)
+    if input.isActionPressed("pause") then
+        pauseMenu.toggle()
+    end
+end
+
+function stateUpdate.PAUSED_SETTINGS(dt)
+    settingsMenu.update(dt)
+    if input.isActionPressed("pause") then
+        settingsMenu.hide()
+    end
+end
+
+function stateUpdate.PAUSED_UPGRADE(dt)
+    upgradeMenu.update(dt)
+end
+
+function stateUpdate.DEATH_ANIMATING(dt)
+    particle.update(dt)
+    projectile.update(dt)
+    deathScreen.update(dt)
+end
+
+function stateUpdate.DEATH_SCREEN(dt)
+    deathScreen.update(dt)
+end
+
+function love.update(dt)
+    input.update()
+    stateUpdate[gameState.current](dt)
     input.clear()
 end
 
+local stateMousepressed = {}
+
+function stateMousepressed.MAIN_MENU(x, y, button)
+    mainMenu.mousepressed(x, y, button)
+end
+
+function stateMousepressed.MAIN_MENU_SETTINGS(x, y, button)
+    settingsMenu.mousepressed(x, y, button)
+end
+
+function stateMousepressed.MENU_TO_PLAY() end
+
+function stateMousepressed.PLAYING(x, y, button)
+    net.mousepressed(x, y, button)
+end
+
+function stateMousepressed.PAUSED_MENU(x, y, button)
+    pauseMenu.mousepressed(x, y, button)
+end
+
+function stateMousepressed.PAUSED_SETTINGS(x, y, button)
+    settingsMenu.mousepressed(x, y, button)
+end
+
+function stateMousepressed.PAUSED_UPGRADE(x, y, button)
+    upgradeMenu.mousepressed(x, y, button)
+end
+
+function stateMousepressed.DEATH_ANIMATING() end
+function stateMousepressed.DEATH_SCREEN() end
+
 function love.mousepressed(x, y, button)
     input.mousepressed(x, y, button)
-
-    if gameState.inMainMenu then
-        mainMenu.mousepressed(x, y, button)
-        return
-    end
-    
-    if gameState.deathScreen.active or gameState.deathScreen.showDeathScreen then
-        return
-    end
-
-    if gameState.pausedForUpgrade then
-        if upgradeMenu.mousepressed(x, y, button) then
-            return
-        end
-    elseif gameState.pausedForSettings then
-        if settingsMenu.mousepressed(x, y, button) then
-            return
-        end
-    elseif gameState.pausedForPause then
-        if pauseMenu.mousepressed(x, y, button) then
-            return
-        end
-    end
-    
-    net.mousepressed(x, y, button)
+    stateMousepressed[gameState.current](x, y, button)
 end
 
 function love.mousereleased(x, y, button)
@@ -180,69 +189,19 @@ function love.keyreleased(key)
     input.keyreleased(key)
 end
 
-function love.draw()
-    love.graphics.setCanvas(canvas)
-    love.graphics.clear()
-
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(assets.bg, 0, 0)
-
-    if gameState.inMainMenu then
-        mainMenu.draw()
-        settingsMenu.draw()
-        drawCursor()
-        love.graphics.setCanvas()
-        love.graphics.clear(0, 0, 0)
-        love.graphics.setColor(1, 1, 1)
-        local display = gameState.display
-        if display then
-            love.graphics.draw(canvas, display.offsetX, display.offsetY, 0, display.scale, display.scale)
-        else
-            local scaleX = love.graphics.getWidth() / config.screen.width
-            local scaleY = love.graphics.getHeight() / config.screen.height
-            love.graphics.draw(canvas, 0, 0, 0, scaleX, scaleY)
-        end
-        return
-    end
-
+local function drawGameWorld()
     if not player.dead then
         player.draw()
     end
-    
     enemy.draw()
-    
     net.draw()
-    
     projectile.draw()
-
     particle.draw()
-    
-    -- Draw tutorial elements
     tutorial.draw()
-
     ui.draw()
-    
-    if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
-        upgradeMenu.draw()
-        pauseMenu.draw()
-        settingsMenu.draw()
-    end
+end
 
-    if gameState.deathScreen.active then
-        deathScreen.draw()
-    end
-
-    if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
-        if mainMenu.fadingOut then
-            love.graphics.setColor(1, 1, 1, mainMenu.fadeOutAlpha)
-            love.graphics.draw(assets.bg, 0, 0)
-        end
-    end
-
-    if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
-        drawCursor()
-    end
-
+local function drawCanvasToScreen()
     love.graphics.setCanvas()
     love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1)
@@ -254,6 +213,73 @@ function love.draw()
         local scaleY = love.graphics.getHeight() / config.screen.height
         love.graphics.draw(canvas, 0, 0, 0, scaleX, scaleY)
     end
+end
+
+local stateDraw = {}
+
+function stateDraw.MAIN_MENU()
+    mainMenu.draw()
+    drawCursor()
+end
+
+function stateDraw.MAIN_MENU_SETTINGS()
+    mainMenu.draw()
+    settingsMenu.draw()
+    drawCursor()
+end
+
+function stateDraw.MENU_TO_PLAY()
+    mainMenu.draw()
+    drawCursor()
+end
+
+function stateDraw.PLAYING()
+    drawGameWorld()
+
+    if mainMenu.fadingOut then
+        love.graphics.setColor(1, 1, 1, mainMenu.fadeOutAlpha)
+        love.graphics.draw(assets.bg, 0, 0)
+    end
+
+    drawCursor()
+end
+
+function stateDraw.PAUSED_MENU()
+    drawGameWorld()
+    pauseMenu.draw()
+    drawCursor()
+end
+
+function stateDraw.PAUSED_SETTINGS()
+    drawGameWorld()
+    settingsMenu.draw()
+    drawCursor()
+end
+
+function stateDraw.PAUSED_UPGRADE()
+    drawGameWorld()
+    upgradeMenu.draw()
+    drawCursor()
+end
+
+function stateDraw.DEATH_ANIMATING()
+    drawGameWorld()
+end
+
+function stateDraw.DEATH_SCREEN()
+    drawGameWorld()
+    deathScreen.draw()
+end
+
+function love.draw()
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear()
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(assets.bg, 0, 0)
+
+    stateDraw[gameState.current]()
+
+    drawCanvasToScreen()
 end
 
 function drawCursor()
