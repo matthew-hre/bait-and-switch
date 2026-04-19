@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: nhartland/love-build@v1
+        id: love-build
+        with:
+          app_name: bait-and-switch
+          love_version: "11.5"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Bait and Switch ${{ github.ref_name }}
+          files: |
+            ${{ steps.love-build.outputs.win32-filename }}
+            ${{ steps.love-build.outputs.win64-filename }}
+            ${{ steps.love-build.outputs.macos-filename }}
+            ${{ steps.love-build.outputs.linux_x86_64-filename }}
+            ${{ steps.love-build.outputs.love-filename }}
