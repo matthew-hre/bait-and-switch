@@ -13,13 +13,9 @@ function assets.load()
 
     assets.enemySprite = love.graphics.newImage("assets/enemy.png")
     
-    -- create this here as not to bog down the particle system
-    assets.whiteSquare = love.graphics.newCanvas(4, 4)
-    love.graphics.setCanvas(assets.whiteSquare)
-    love.graphics.clear()
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.rectangle("fill", 0, 0, 4, 4)
-    love.graphics.setCanvas()
+    local squareData = love.image.newImageData(4, 4)
+    squareData:mapPixel(function() return 1, 1, 1, 1 end)
+    assets.whiteSquare = love.graphics.newImage(squareData)
     
     assets.ui = {}
     assets.ui.progress = love.graphics.newImage("assets/ui/progress.png")

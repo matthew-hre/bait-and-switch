@@ -77,6 +77,8 @@ function deathScreen.resetGame()
     
     ui.setHealth(player.health)
     ui.setProgress(0, gameState.killsPerWave)
+    ui.progress.slideOut = false
+    ui.progress.yOffset = 0
 end
 
 function deathScreen.update(dt)

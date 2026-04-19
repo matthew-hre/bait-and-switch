@@ -10,6 +10,7 @@ local gameState = {
     pausedForUpgrade = false,
     pausedForPause = false,
     pausedForSettings = false,
+    inMainMenu = true,
     tutorialMode = true,
     
     settings = {

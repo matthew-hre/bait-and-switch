@@ -4,18 +4,18 @@
 
 - [ ] make this readme better
 - [x] death screen w/ round number
-- [ ] sound effects
+- [x] sound effects
 - [x] tutorial
 - [ ] main menu
 - [x] pause menu
-- [ ] settings menu
-  - [ ] volume
+- [x] settings menu
+  - [x] volume
   - [ ] controls
-  - [ ] resolution
+  - [x] resolution
   - [ ] graphics / particles
-- [ ] persistent data
-  - [ ] high score
-  - [ ] settings
+- [x] persistent data
+  - [x] high score
+  - [x] settings
 
 ## roadmap
 

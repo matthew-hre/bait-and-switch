@@ -11,6 +11,7 @@ local tutorial = require("src.tutorial")
 local utils = require("src.utils")
 
 local gameState = require("src.gameState")
+local mainMenu = require("src.mainMenu")
 local upgradeMenu = require("src.upgradeMenu")
 local deathScreen = require("src.deathScreen")
 local pauseMenu = require("src.pauseMenu")
@@ -41,6 +42,7 @@ function love.load()
     pauseMenu.load()
     settingsMenu.load()
     tutorial.load()
+    mainMenu.load()
 
     local data = save.read()
     if data then
@@ -50,6 +52,12 @@ end
 
 function love.update(dt)
     input.update()
+
+    if gameState.inMainMenu then
+        mainMenu.update(dt)
+        input.clear()
+        return
+    end
     
     if gameState.deathScreen.showDeathScreen then
         particle.update(dt)
@@ -77,6 +85,14 @@ function love.update(dt)
         end
         input.clear()
         return
+    end
+
+    if mainMenu.fadingOut then
+        mainMenu.fadeOutAlpha = mainMenu.fadeOutAlpha - dt * mainMenu.config.fadeOutSpeed
+        if mainMenu.fadeOutAlpha <= 0 then
+            mainMenu.fadeOutAlpha = 0
+            mainMenu.fadingOut = false
+        end
     end
 
     particle.update(dt)
@@ -124,6 +140,11 @@ end
 
 function love.mousepressed(x, y, button)
     input.mousepressed(x, y, button)
+
+    if gameState.inMainMenu then
+        mainMenu.mousepressed(x, y, button)
+        return
+    end
     
     if gameState.deathScreen.active or gameState.deathScreen.showDeathScreen then
         return
@@ -165,6 +186,24 @@ function love.draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(assets.bg, 0, 0)
 
+    if gameState.inMainMenu then
+        mainMenu.draw()
+        settingsMenu.draw()
+        drawCursor()
+        love.graphics.setCanvas()
+        love.graphics.clear(0, 0, 0)
+        love.graphics.setColor(1, 1, 1)
+        local display = gameState.display
+        if display then
+            love.graphics.draw(canvas, display.offsetX, display.offsetY, 0, display.scale, display.scale)
+        else
+            local scaleX = love.graphics.getWidth() / config.screen.width
+            local scaleY = love.graphics.getHeight() / config.screen.height
+            love.graphics.draw(canvas, 0, 0, 0, scaleX, scaleY)
+        end
+        return
+    end
+
     if not player.dead then
         player.draw()
     end
@@ -190,6 +229,13 @@ function love.draw()
 
     if gameState.deathScreen.active then
         deathScreen.draw()
+    end
+
+    if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
+        if mainMenu.fadingOut then
+            love.graphics.setColor(1, 1, 1, mainMenu.fadeOutAlpha)
+            love.graphics.draw(assets.bg, 0, 0)
+        end
     end
 
     if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then

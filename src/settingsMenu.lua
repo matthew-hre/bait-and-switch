@@ -40,8 +40,8 @@ function settingsMenu.load()
         slideSpeed = 12,
         onHideComplete = function()
             settingsMenu.visible = false
-            gameState.paused = false
             gameState.pausedForSettings = false
+            gameState.paused = false
         end,
         drawContent = function(popup, x, y)
             settingsMenu.drawContent(x, y)
