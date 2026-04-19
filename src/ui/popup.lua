@@ -52,7 +52,7 @@ function popup.new(options)
         if not self.visible then return end
         
         if self.isAnimating then
-            local speed = self.isExiting and popup.config.exitSpeed or popup.config.slideSpeed
+            local speed = self.isExiting and (options.exitSpeed or popup.config.exitSpeed) or (options.slideSpeed or popup.config.slideSpeed)
             self.y = utils.lerp(self.y, self.targetY, dt * speed)
             
             if self.isExiting then

@@ -14,6 +14,7 @@ local gameState = require("src.gameState")
 local upgradeMenu = require("src.upgradeMenu")
 local deathScreen = require("src.deathScreen")
 local pauseMenu = require("src.pauseMenu")
+local settingsMenu = require("src.settingsMenu")
 
 local ui = require("src.ui")
 local input = require("src.input")
@@ -38,6 +39,7 @@ function love.load()
     ui.load()
     upgradeMenu.load()
     pauseMenu.load()
+    settingsMenu.load()
     tutorial.load()
 
     local data = save.read()
@@ -59,11 +61,17 @@ function love.update(dt)
     if gameState.paused then
 
         if input.isActionPressed("pause") and not gameState.pausedForUpgrade then
-            pauseMenu.toggle()
+            if gameState.pausedForSettings then
+                settingsMenu.hide()
+            else
+                pauseMenu.toggle()
+            end
         end
 
         if gameState.pausedForUpgrade then
             upgradeMenu.update(dt)
+        elseif gameState.pausedForSettings then
+            settingsMenu.update(dt)
         elseif gameState.pausedForPause then
             pauseMenu.update(dt)
         end
@@ -125,6 +133,10 @@ function love.mousepressed(x, y, button)
         if upgradeMenu.mousepressed(x, y, button) then
             return
         end
+    elseif gameState.pausedForSettings then
+        if settingsMenu.mousepressed(x, y, button) then
+            return
+        end
     elseif gameState.pausedForPause then
         if pauseMenu.mousepressed(x, y, button) then
             return
@@ -173,6 +185,7 @@ function love.draw()
     if not gameState.deathScreen.active and not gameState.deathScreen.showDeathScreen then
         upgradeMenu.draw()
         pauseMenu.draw()
+        settingsMenu.draw()
     end
 
     if gameState.deathScreen.active then
@@ -184,10 +197,16 @@ function love.draw()
     end
 
     love.graphics.setCanvas()
+    love.graphics.clear(0, 0, 0)
     love.graphics.setColor(1, 1, 1)
-    local scaleX = love.graphics.getWidth() / config.screen.width
-    local scaleY = love.graphics.getHeight() / config.screen.height
-    love.graphics.draw(canvas, 0, 0, 0, scaleX, scaleY)
+    local display = gameState.display
+    if display then
+        love.graphics.draw(canvas, display.offsetX, display.offsetY, 0, display.scale, display.scale)
+    else
+        local scaleX = love.graphics.getWidth() / config.screen.width
+        local scaleY = love.graphics.getHeight() / config.screen.height
+        love.graphics.draw(canvas, 0, 0, 0, scaleX, scaleY)
+    end
 end
 
 function drawCursor()

@@ -75,7 +75,14 @@ function pauseMenu.hide()
 end
 
 function pauseMenu.showSettings()
-    print("Settings menu would go here")
+    local settingsMenu = require("src.settingsMenu")
+    -- Hide instantly (no animation) since we're transitioning to settings
+    pauseMenu.visible = false
+    pauseMenu.isAnimating = false
+    pauseMenu.isExiting = false
+    pauseMenu.y = pauseMenu.config.startY
+    gameState.pausedForPause = false
+    settingsMenu.show()
 end
 
 function pauseMenu.update(dt)
@@ -94,8 +101,10 @@ function pauseMenu.update(dt)
                 pauseMenu.isExiting = false
                 pauseMenu.y = pauseMenu.config.startY
                 
-                gameState.paused = false
                 gameState.pausedForPause = false
+                if not gameState.pausedForSettings then
+                    gameState.paused = false
+                end
             end
         else
             if math.abs(pauseMenu.y - pauseMenu.targetY) < 1 then

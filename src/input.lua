@@ -22,12 +22,14 @@ function input.load()
     input.movements = config.controls.movement
     input.actions.net = config.controls.action.net
     input.screenScale = love.graphics.getWidth() / config.screen.width
+    input.screenOffsetX = 0
+    input.screenOffsetY = 0
 end
 
 function input.update()    
     input.mouse.x, input.mouse.y = love.mouse.getPosition()
-    input.mouse.scaledX = input.mouse.x / input.screenScale
-    input.mouse.scaledY = input.mouse.y / input.screenScale
+    input.mouse.scaledX = (input.mouse.x - input.screenOffsetX) / input.screenScale
+    input.mouse.scaledY = (input.mouse.y - input.screenOffsetY) / input.screenScale
 end
 
 function input.clear()
