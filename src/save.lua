@@ -1,13 +1,21 @@
 local save = {}
 
-local SAVE_FILE = "savedata.lua"
+local function isWeb()
+    return love.system and love.system.getOS() == "Web"
+end
 
-function save.write(data)
-    local serialized = "return " .. save.serializeTable(data)
+function save.write(_data)
+    if isWeb() then return end
+
+    local SAVE_FILE = "savedata.lua"
+    local serialized = "return " .. save.serializeTable(_data)
     love.filesystem.write(SAVE_FILE, serialized)
 end
 
 function save.read()
+    if isWeb() then return nil end
+
+    local SAVE_FILE = "savedata.lua"
     if not love.filesystem.getInfo(SAVE_FILE) then return nil end
     local chunk = love.filesystem.load(SAVE_FILE)
     if chunk then return chunk() end

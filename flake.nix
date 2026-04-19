@@ -32,6 +32,7 @@
           lua
           love
           stylua
+          nodejs
         ];
         SDL_VIDEODRIVER = "";
       };
