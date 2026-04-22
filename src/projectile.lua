@@ -26,7 +26,10 @@ projectile.config = {
     collisionRadius = 12,
     
     maxBounces = 0,
-    bounceDamping = 0.99
+    bounceDamping = 0.99,
+
+    splitCount = 0,
+    splitSizeMultiplier = 0.5
 }
 
 projectile.active = {}
@@ -47,21 +50,31 @@ function projectile.load()
     projectile.size = 1
 end
 
-function projectile.create(x, y, targetX, targetY)
+function projectile.create(x, y, targetX, targetY, options)
+    options = options or {}
     local p = {}
     p.x = x
     p.y = y
     p.particleTimer = 0 
 
     p.angle = math.atan2(targetY - y, targetX - x)
-    
-    p.vx = math.cos(p.angle) * projectile.config.speed
-    p.vy = math.sin(p.angle) * projectile.config.speed
+
+    local speed = projectile.config.speed
+    p.vx = math.cos(p.angle) * speed
+    p.vy = math.sin(p.angle) * speed
     
     p.hitEnemies = {}
     
-    p.bouncesRemaining = projectile.config.maxBounces
-    
+    if options.bounces ~= nil then
+        p.bouncesRemaining = options.bounces
+    elseif options.noBounce then
+        p.bouncesRemaining = 0
+    else
+        p.bouncesRemaining = projectile.config.maxBounces
+    end
+    p.scale = options.scale or projectile.size
+    p.canSplit = not options.noSplit
+
     table.insert(projectile.active, p)
     return p
 end
@@ -123,6 +136,7 @@ function projectile.update(dt)
         end
         
         checkEnemyCollision(p)
+        n = #projectile.active
         
         local bounced = false
         local margin = projectile.config.margin
@@ -164,7 +178,8 @@ function projectile.update(dt)
             assets.playSound(assets.audio.bounce, 0.1)
         end
         
-        if p.x < -margin or p.x > projectile.screenWidth + margin or
+        if p.dead or
+           p.x < -margin or p.x > projectile.screenWidth + margin or
            p.y < -margin or p.y > projectile.screenHeight + margin then
             projectile.active[i] = projectile.active[n]
             projectile.active[n] = nil
@@ -179,6 +194,7 @@ function projectile.checkEnemyCollision(proj)
     local sqrt = math.sqrt
     local ipairs = ipairs
     local collisionRadius = projectile.config.collisionRadius
+    local hitAny = false
     
     for _, e in ipairs(enemy.active) do
         if not e.caught and not e.dead and not proj.hitEnemies[e] then
@@ -188,10 +204,28 @@ function projectile.checkEnemyCollision(proj)
             
             if distance < collisionRadius then
                 proj.hitEnemies[e] = true
+                hitAny = true
                 
                 enemy.kill(e)
             end
         end
+    end
+
+    if hitAny and proj.canSplit and not proj.hasSplit and projectile.config.splitCount > 0 then
+        proj.hasSplit = true
+        proj.dead = true
+        for i = 1, projectile.config.splitCount do
+            local spread = (math.random() * 2 - 1) * math.rad(40)
+            local splitAngle = proj.angle + spread
+            local splitTargetX = proj.x + math.cos(splitAngle) * 100
+            local splitTargetY = proj.y + math.sin(splitAngle) * 100
+            projectile.create(proj.x, proj.y, splitTargetX, splitTargetY, {
+                bounces = proj.bouncesRemaining,
+                noSplit = true,
+                scale = projectile.size * projectile.config.splitSizeMultiplier
+            })
+        end
+        assets.playSound(assets.audio.bounce, 0.1)
     end
 end
 
@@ -207,7 +241,8 @@ function projectile.draw()
     
     for _, p in ipairs(projectile.active) do
         local drawAngle = p.angle + pi/2
-        utils.drawWithShadow(sprite, floor(p.x), floor(p.y), drawAngle, scale, scale, ox, oy, shadowOffset, shadowColor)
+        local s = p.scale or scale
+        utils.drawWithShadow(sprite, floor(p.x), floor(p.y), drawAngle, s, s, ox, oy, shadowOffset, shadowColor)
     end
 end
 

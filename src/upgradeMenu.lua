@@ -58,7 +58,14 @@ function upgradeMenu.load()
                 projectile.config.speed = projectile.config.speed * 0.8
             end
         },
-        -- { name = "split shot", description = "two shots, 60%", image = assets.ui.upgrades.splitshot },
+        {
+            name = "split shot",
+            description = "bug guts shoot out",
+            image = assets.ui.upgrades.splitshot,
+            effect = function()
+                projectile.config.splitCount = projectile.config.splitCount + 2
+            end
+        },
     }
 
     upgradeMenu.list = UpgradeList.new({
