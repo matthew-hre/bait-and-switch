@@ -2,6 +2,11 @@ local assets = {}
 
 local config = require("src.config")
 
+function assets.tintedShadow(color)
+    local s = config.visual.shadowColor
+    return {s[1] * color[1], s[2] * color[2], s[3] * color[3], 1}
+end
+
 function assets.load()
     assets.bg = love.graphics.newImage("assets/bg.png")
     assets.cursor = love.graphics.newImage("assets/cursor.png")
@@ -56,9 +61,16 @@ function assets.load()
     assets.audio.upgradeSelect = love.audio.newSource("assets/audio/upgradeSelect.wav", "static")
     assets.audio.waveComplete = love.audio.newSource("assets/audio/waveComplete.wav", "static")
     assets.audio.gameOver = love.audio.newSource("assets/audio/gameOver.wav", "static")
+    assets.audio.speedyBugPass = love.audio.newSource("assets/audio/speedyBugPass.wav", "static")
 
     assets.primaryColor = {1, 0.6, 0.2, 1} -- Orange/fire color
     assets.shadowColor = config.visual.shadowColor
+
+    assets.enemyColor = {0xd3 / 255, 0xfc / 255, 0x7e / 255, 1}
+    assets.speedyBugColor = {0xf7 / 255, 0x76 / 255, 0x22 / 255, 1}
+
+    assets.enemyShadowColor = assets.tintedShadow(assets.enemyColor)
+    assets.speedyBugShadowColor = assets.tintedShadow(assets.speedyBugColor)
 end
 
 assets.soundPoolSize = 8

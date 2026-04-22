@@ -4,7 +4,7 @@ function utils.lerp(a, b, t)
 	return a + (b - a) * t
 end
 
-function utils.drawWithShadow(sprite, x, y, angle, sx, sy, ox, oy, shadowOffset, shadowColor)
+function utils.drawWithShadow(sprite, x, y, angle, sx, sy, ox, oy, shadowOffset, shadowColor, tint)
     -- Default values
     sx = sx or 1
     sy = sy or sx
@@ -19,7 +19,11 @@ function utils.drawWithShadow(sprite, x, y, angle, sx, sy, ox, oy, shadowOffset,
     love.graphics.draw(sprite, x + shadowOffset, y + shadowOffset, angle, sx, sy, ox, oy)
     
     -- Draw main sprite
-    love.graphics.setColor(1, 1, 1)
+    if tint then
+        love.graphics.setColor(tint)
+    else
+        love.graphics.setColor(1, 1, 1)
+    end
     love.graphics.draw(sprite, x, y, angle, sx, sy, ox, oy)
 end
 

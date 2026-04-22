@@ -53,6 +53,9 @@ function enemy.load()
     enemy.spriteHeight = enemy.sprite:getHeight()
     enemy.spriteOX = enemy.spriteWidth / 2
     enemy.spriteOY = enemy.spriteHeight / 2
+    
+    enemy.color = assets.enemyColor
+    enemy.enemyShadowColor = assets.enemyShadowColor
 end
 
 function enemy.createEnemy()
@@ -120,7 +123,9 @@ function enemy.kill(e, silent)
             rotation = rotation,
             vx = vx,
             vy = vy,
-            shadowOffset = enemy.shadowOffset
+            shadowOffset = enemy.shadowOffset,
+            shadowColor = enemy.enemyShadowColor,
+            color = enemy.color,
         }
         
         particle.create(e.x, e.y, assets.whiteSquare, particleOptions)
@@ -213,6 +218,13 @@ function enemy.update(dt)
             for i = 1, spawnCount do
                 enemy.createEnemy()
             end
+            
+            local speedyBug = require("src.speedyBug")
+            if gameState.stats.currentWave >= speedyBug.config.minWave then
+                if math.random() < speedyBug.config.spawnChance then
+                    speedyBug.scheduleSpawn()
+                end
+            end
         end
     end
     
@@ -293,12 +305,14 @@ function enemy.draw()
     local oy = enemy.spriteOY
     local snapFactor = enemy.angleSnapFactor
     local shadowOffset = enemy.shadowOffset
-    local shadowColor = enemy.shadowColor
+    local shadowColor = enemy.enemyShadowColor
+    
+    local tint = enemy.color
     
     for _, e in ipairs(enemy.active) do
         if not e.caught and not e.dead then
             local angle = floor(e.angle * snapFactor) / snapFactor
-            utils.drawWithShadow(sprite, floor(e.x), floor(e.y), angle, 1, 1, ox, oy, shadowOffset, shadowColor)
+            utils.drawWithShadow(sprite, floor(e.x), floor(e.y), angle, 1, 1, ox, oy, shadowOffset, shadowColor, tint)
         end
     end
 end

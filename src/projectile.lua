@@ -48,6 +48,8 @@ function projectile.load()
     projectile.spriteOY = projectile.spriteHeight / 2
     
     projectile.size = 1
+    projectile.color = assets.enemyColor
+    projectile.enemyShadowColor = assets.enemyShadowColor
 end
 
 function projectile.create(x, y, targetX, targetY, options)
@@ -130,12 +132,15 @@ function projectile.update(dt)
                 shadowOffset = projectile.shadowOffset
             }
 
+            particleOptions.color = projectile.color
+            particleOptions.shadowColor = projectile.enemyShadowColor
             particle.create(p.x, p.y, projectile.sprite, particleOptions)
             
             p.particleTimer = 0
         end
         
         checkEnemyCollision(p)
+        projectile.checkSpeedyBugCollision(p)
         n = #projectile.active
         
         local bounced = false
@@ -229,20 +234,52 @@ function projectile.checkEnemyCollision(proj)
     end
 end
 
+function projectile.checkSpeedyBugCollision(proj)
+    local speedyBug = require("src.speedyBug")
+    local sqrt = math.sqrt
+    local collisionRadius = projectile.config.collisionRadius
+    
+    for _, b in ipairs(speedyBug.active) do
+        if not proj.hitEnemies[b] then
+            local dx = proj.x - b.x
+            local dy = proj.y - b.y
+            local distance = sqrt(dx * dx + dy * dy)
+            
+            if distance < collisionRadius then
+                proj.hitEnemies[b] = true
+                
+                -- reflect projectile velocity off the speedy bug
+                local len = sqrt(dx * dx + dy * dy)
+                if len > 0 then
+                    local nx, ny = dx / len, dy / len
+                    local dot = proj.vx * nx + proj.vy * ny
+                    proj.vx = proj.vx - 2 * dot * nx
+                    proj.vy = proj.vy - 2 * dot * ny
+                    proj.angle = math.atan2(proj.vy, proj.vx)
+                end
+                
+                assets.playSound(assets.audio.bounce, 0.1)
+            end
+        end
+    end
+end
+
 function projectile.draw()
     local floor = math.floor
     local sprite = projectile.sprite
     local ox = projectile.spriteOX
     local oy = projectile.spriteOY
     local shadowOffset = projectile.shadowOffset
-    local shadowColor = projectile.shadowColor
+    local shadowColor = projectile.enemyShadowColor
     local pi = math.pi
     local scale = projectile.size or 1
+    
+    local tint = projectile.color
     
     for _, p in ipairs(projectile.active) do
         local drawAngle = p.angle + pi/2
         local s = p.scale or scale
-        utils.drawWithShadow(sprite, floor(p.x), floor(p.y), drawAngle, s, s, ox, oy, shadowOffset, shadowColor)
+        utils.drawWithShadow(sprite, floor(p.x), floor(p.y), drawAngle, s, s, ox, oy, shadowOffset, shadowColor, tint)
     end
 end
 

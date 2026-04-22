@@ -318,6 +318,120 @@ const sounds = {
     duration: 0.12,
   },
 
+  speedyBugPass: {
+    name: "Speedy Bug Loop",
+    desc: "Short looping chugga-chugga segment at constant volume — game controls fade",
+    category: "Gameplay",
+    generate(ctx, dest) {
+      const now = ctx.currentTime;
+      const crossfade = 0.05;
+      const duration = 0.5 + crossfade; // 6 chug cycles + crossfade tail
+      const chugRate = 12;
+
+      // Master gain — constant volume, game handles fade
+      const master = ctx.createGain();
+      master.gain.value = 0.7;
+      master.connect(dest);
+
+      // Layer 1: Low-frequency sine "engine" with rhythmic amplitude modulation
+      const engine = ctx.createOscillator();
+      engine.type = "sine";
+      engine.frequency.setValueAtTime(110, now);
+
+      const engineFilter = ctx.createBiquadFilter();
+      engineFilter.type = "lowpass";
+      engineFilter.frequency.value = 320;
+
+      const lfo = ctx.createOscillator();
+      lfo.type = "sine";
+      lfo.frequency.value = chugRate;
+
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.value = 0.12;
+
+      const engineGain = ctx.createGain();
+      engineGain.gain.value = 0.12;
+
+      lfo.connect(lfoGain);
+      lfoGain.connect(engineGain.gain);
+      engine.connect(engineFilter);
+      engineFilter.connect(engineGain);
+      engineGain.connect(master);
+
+      engine.start(now);
+      engine.stop(now + duration);
+      lfo.start(now);
+      lfo.stop(now + duration);
+
+      // Layer 2: Friction texture — "CHUG-ga" noise bursts
+      const totalChugs = Math.floor(duration * chugRate);
+      for (let c = 0; c < totalChugs; c++) {
+        const isDown = c % 2 === 0;
+        const t = now + c / chugRate;
+        const chugDur = isDown ? 0.06 : 0.04;
+        const freq = isDown ? 900 : 1400;
+        const vol = isDown ? 0.18 : 0.1;
+
+        const noise = createNoise(ctx, chugDur);
+
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.value = freq;
+        bp.Q.value = 3;
+
+        const hp = ctx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 300;
+        hp.Q.value = 1.5;
+
+        const chugGain = ctx.createGain();
+        chugGain.gain.setValueAtTime(0.01, t);
+        chugGain.gain.linearRampToValueAtTime(vol, t + 0.008);
+        chugGain.gain.linearRampToValueAtTime(vol * 0.7, t + chugDur * 0.6);
+        chugGain.gain.exponentialRampToValueAtTime(0.01, t + chugDur);
+
+        noise.connect(hp);
+        hp.connect(bp);
+        bp.connect(chugGain);
+        chugGain.connect(master);
+        noise.start(t);
+        noise.stop(t + chugDur);
+      }
+
+      // Layer 3: Gentle hum for insect character
+      const buzz = ctx.createOscillator();
+      buzz.type = "triangle";
+      buzz.frequency.value = 280;
+
+      const buzzFilter = ctx.createBiquadFilter();
+      buzzFilter.type = "lowpass";
+      buzzFilter.frequency.value = 480;
+
+      const buzzLfo = ctx.createOscillator();
+      buzzLfo.type = "sine";
+      buzzLfo.frequency.value = chugRate;
+
+      const buzzLfoGain = ctx.createGain();
+      buzzLfoGain.gain.value = 0.08;
+
+      const buzzGain = ctx.createGain();
+      buzzGain.gain.value = 0.08;
+
+      buzzLfo.connect(buzzLfoGain);
+      buzzLfoGain.connect(buzzGain.gain);
+      buzz.connect(buzzFilter);
+      buzzFilter.connect(buzzGain);
+      buzzGain.connect(master);
+
+      buzz.start(now);
+      buzz.stop(now + duration);
+      buzzLfo.start(now);
+      buzzLfo.stop(now + duration);
+    },
+    duration: 0.5,
+    crossfade: 0.05,
+  },
+
   // === UI ===
   uiHover: {
     name: "UI Hover",
@@ -481,10 +595,37 @@ function playSound(key) {
 async function renderToBuffer(key) {
   const sound = sounds[key];
   const sampleRate = SAMPLE_RATE;
-  const length = sampleRate * sound.duration;
+  const fadeTime = sound.crossfade || 0;
+  const renderDuration = sound.duration + fadeTime;
+  const length = Math.ceil(sampleRate * renderDuration);
   const offline = new OfflineAudioContext(1, length, sampleRate);
   sound.generate(offline, offline.destination);
-  return await offline.startRendering();
+  const rendered = await offline.startRendering();
+
+  if (fadeTime > 0) {
+    // Crossfade: blend the tail into the head for seamless looping
+    const loopLength = Math.floor(sampleRate * sound.duration);
+    const fadeSamples = Math.floor(sampleRate * fadeTime);
+    const ctx = new OfflineAudioContext(1, loopLength, sampleRate);
+    const output = ctx.createBuffer(1, loopLength, sampleRate);
+    const src = rendered.getChannelData(0);
+    const dst = output.getChannelData(0);
+
+    // Copy the loop body
+    for (let i = 0; i < loopLength; i++) {
+      dst[i] = src[i];
+    }
+    // Crossfade: fade out the head, fade in the tail
+    for (let i = 0; i < fadeSamples; i++) {
+      const t = i / fadeSamples; // 0→1
+      const fadeIn = t;
+      const fadeOut = 1 - t;
+      dst[i] = src[i] * fadeIn + src[loopLength + i] * fadeOut;
+    }
+    return output;
+  }
+
+  return rendered;
 }
 
 function audioBufferToWav(buffer) {

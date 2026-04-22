@@ -36,6 +36,7 @@ function particle.create(x, y, sprite, options)
     p.vx = options.vx or particle.config.defaultVelocity.x
     p.vy = options.vy or particle.config.defaultVelocity.y
     p.shadowOffset = options.shadowOffset or particle.shadowOffset
+    p.shadowColor = options.shadowColor
     p.color = options.color or particle.config.defaultColor
     
     table.insert(particle.active, p)
@@ -85,6 +86,11 @@ function particle.draw()
         local angle = p.angle
         local shadowOffset = p.shadowOffset * scale
         
+        local tint = nil
+        if p.color[1] ~= 1 or p.color[2] ~= 1 or p.color[3] ~= 1 or p.color[4] ~= 1 then
+            tint = p.color
+        end
+        
         utils.drawWithShadow(
             sprite, 
             px, 
@@ -95,22 +101,9 @@ function particle.draw()
             ox, 
             oy,
             shadowOffset,
-            shadowColor
+            p.shadowColor or shadowColor,
+            tint
         )
-        
-        if p.color[1] ~= 1 or p.color[2] ~= 1 or p.color[3] ~= 1 or p.color[4] ~= 1 then
-            love.graphics.setColor(p.color)
-            love.graphics.draw(
-                sprite, 
-                px, 
-                py, 
-                angle, 
-                scale, 
-                scale, 
-                ox, 
-                oy
-            )
-        end
     end
 end
 

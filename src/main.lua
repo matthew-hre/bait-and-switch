@@ -7,6 +7,7 @@ local net = require("src.net")
 local enemy = require("src.enemy")
 local projectile = require("src.projectile")
 local particle = require("src.particle")
+local speedyBug = require("src.speedyBug")
 local tutorial = require("src.tutorial")
 local utils = require("src.utils")
 
@@ -36,6 +37,7 @@ function love.load()
     enemy.load()
     net.load()
     projectile.load()
+    speedyBug.load()
     particle.load()
     ui.load()
     upgradeMenu.load()
@@ -83,6 +85,8 @@ function stateUpdate.PLAYING(dt)
     net.update(dt)
     tutorial.update(dt)
 
+    speedyBug.update(dt)
+    
     if not gameState.tutorialMode then
         enemy.update(dt)
     else
@@ -128,6 +132,7 @@ end
 function stateUpdate.DEATH_ANIMATING(dt)
     particle.update(dt)
     projectile.update(dt)
+    speedyBug.update(dt)
     deathScreen.update(dt)
 end
 
@@ -194,6 +199,7 @@ local function drawGameWorld()
         player.draw()
     end
     enemy.draw()
+    speedyBug.draw()
     net.draw()
     projectile.draw()
     particle.draw()
