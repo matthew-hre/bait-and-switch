@@ -1,0 +1,88 @@
+when:
+  - event: ["push"]
+    tag: ["*"]
+
+engine: nixery
+
+dependencies:
+  nixpkgs:
+    - bash
+    - coreutils
+    - git
+    - go
+    - zip
+    - unzip
+    - curl
+    - jq
+    - xxd
+
+environment:
+  LOVE_VERSION: "11.5"
+  APP_NAME: "bait-and-switch"
+
+steps:
+  - name: install goat
+    command: |
+      go install github.com/bluesky-social/goat@latest
+      mkdir -p ./bin
+      cp "$(go env GOPATH)/bin/goat" ./bin/goat
+      export PATH="$PWD/bin:$PATH"
+      goat --help > /dev/null
+
+  - name: login to PDS
+    command: |
+      export PATH="$PWD/bin:$PATH"
+      goat account login -u "$ATP_USERNAME" -p "$ATP_PASSWORD"
+
+  - name: build .love file
+    command: |
+      mkdir -p dist staging
+      # Copy only the files needed to run the game.
+      cp -r assets src main.lua conf.lua staging/
+      (cd staging && zip -9 -r "../dist/${APP_NAME}.love" .)
+
+  - name: build windows bundles
+    command: |
+      for arch in win32 win64; do
+        curl -fsSL -o "love-${arch}.zip" \
+          "https://github.com/love2d/love/releases/download/${LOVE_VERSION}/love-${LOVE_VERSION}-${arch}.zip"
+        unzip -q "love-${arch}.zip"
+        LOVE_DIR=$(find . -maxdepth 1 -type d -name "love-${LOVE_VERSION}-${arch}" | head -1)
+        cat "${LOVE_DIR}/love.exe" "dist/${APP_NAME}.love" > "${LOVE_DIR}/${APP_NAME}.exe"
+        rm -f "${LOVE_DIR}/love.exe" "${LOVE_DIR}/lovec.exe"
+        OUT="${APP_NAME}-${arch}"
+        mv "${LOVE_DIR}" "${OUT}"
+        zip -9 -r "dist/${OUT}.zip" "${OUT}"
+        rm -rf "${OUT}" "love-${arch}.zip"
+      done
+
+  - name: build macos bundle
+    command: |
+      curl -fsSL -o love-macos.zip \
+        "https://github.com/love2d/love/releases/download/${LOVE_VERSION}/love-${LOVE_VERSION}-macos.zip"
+      unzip -q love-macos.zip
+      cp "dist/${APP_NAME}.love" love.app/Contents/Resources/
+      mv love.app "${APP_NAME}.app"
+      zip -9 -r --symlinks "dist/${APP_NAME}-macos.zip" "${APP_NAME}.app"
+      rm -rf "${APP_NAME}.app" love-macos.zip
+
+  - name: build linux bundle
+    command: |
+      curl -fsSL -o love-linux.AppImage \
+        "https://github.com/love2d/love/releases/download/${LOVE_VERSION}/love-${LOVE_VERSION}-x86_64.AppImage"
+      chmod +x love-linux.AppImage
+      cat love-linux.AppImage "dist/${APP_NAME}.love" > "dist/${APP_NAME}-linux-x86_64.AppImage"
+      chmod +x "dist/${APP_NAME}-linux-x86_64.AppImage"
+      rm -f love-linux.AppImage
+
+  - name: publish artifacts
+    command: |
+      export PATH="$PWD/bin:$PATH"
+      export TAG="$TANGLED_REF_NAME"
+      export REPO_URL="$TANGLED_REPO_URL"
+      chmod +x tools/publish-artifact.sh
+      for f in dist/*; do
+        ARTIFACT_PATH="$f" \
+        ARTIFACT_NAME="$(basename "$f")" \
+        bash tools/publish-artifact.sh
+      done
